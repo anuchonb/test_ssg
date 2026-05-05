@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คู่มือการใช้งาน CRM Condo System v1.0</title>
+     <!-- ✅ โหลดฟอนต์ Sarabun จาก Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+        }
+        
+        body {
+            font-family: 'Sarabun', sans-serif;
+            line-height: 1.8;
+            color: #333;
+            padding-bottom: 50px;
+        }
+        
+        .manual-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .manual-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+        }
+        
+        .manual-header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .sidebar-nav {
+            position: sticky;
+            top: 20px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .sidebar-nav .nav-link {
+            color: #555;
+            padding: 6px 15px;
+            border-left: 3px solid transparent;
+            font-size: 14px;
+        }
+        
+        .sidebar-nav .nav-link:hover,
+        .sidebar-nav .nav-link.active {
+            color: var(--primary);
+            border-left-color: var(--primary);
+            background: #f0f2ff;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            scroll-margin-top: 20px;
+        }
+        
+        .section h2 {
+            color: var(--primary);
+            border-bottom: 2px solid #e3e6f0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        .section h3 {
+            color: #555;
+            font-size: 18px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        .section h4 {
+            color: #777;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        
+        .card-info {
+            border-left: 4px solid var(--primary);
+            background: #f8f9fc;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .card-tip {
+            border-left: 4px solid #1cc88a;
+            background: #f0fff4;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .card-warning {
+            border-left: 4px solid #f6c23e;
+            background: #fffdf0;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .card-danger {
+            border-left: 4px solid #e74a3b;
+            background: #fff5f5;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .role-table td:first-child {
+            font-weight: 600;
+            width: 150px;
+        }
+        
+        .screenshot {
+            border: 1px solid #e3e6f0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 100%;
+            margin: 15px 0;
+        }
+        
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 14px;
+            margin-right: 8px;
+        }
+        
+        .keyboard-key {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #f1f3f5;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        
+        .toc-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc-list li {
+            padding: 3px 0;
+        }
+        
+        .toc-list a {
+            color: #555;
+            text-decoration: none;
+        }
+        
+        .toc-list a:hover {
+            color: var(--primary);
+        }
+        
+        @media print {
+            .sidebar-nav { display: none; }
+            .manual-header { background: #667eea !important; -webkit-print-color-adjust: exact; }
+            .section { page-break-inside: avoid; }
+        }
+        
+        .btn-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 999;
+        }
+        
+        .btn-top:hover {
+            background: var(--secondary);
+        }
+        
+        .btn-print {
+            position: fixed;
+            bottom: 85px;
+            right: 30px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #1cc88a;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== HEADER ==================== -->
+    <div class="manual-header">
+        <div class="container">
+            <h1>📚 คู่มือการใช้งานระบบ CRM Condo</h1>
+            <p>ระบบจัดการคอนโดและสินเชื่อ เวอร์ชั่น 1.0</p>
+            <p class="small mt-2">เอกสารนี้ใช้สำหรับอบรมและอ้างอิงการใช้งานระบบ</p>
+        </div>
+    </div>
+
+    <!-- ==================== CONTENT ==================== -->
+    <div class="container">
+        <div class="row">
+            
+            <!-- Sidebar Navigation -->
+            <div class="col-lg-3 d-none d-lg-block">
+                <nav class="sidebar-nav">
+                    <h6 class="fw-bold mb-2">📑 สารบัญ</h6>
+                    <ul class="toc-list">
+                        <li><a href="#section-intro">🔹 1. แนะนำระบบ</a></li>
+                        <li><a href="#section-login">🔹 2. การเข้าสู่ระบบ</a></li>
+                        <li><a href="#section-roles">🔹 3. Roles และสิทธิ์</a></li>
+                        <li><a href="#section-dashboard">🔹 4. Dashboard</a></li>
+                        <li><a href="#section-customer">🔹 5. การจัดการลูกค้า</a></li>
+                        <li><a href="#section-case">🔹 6. การจัดการเคส</a></li>
+                        <li><a href="#section-follow">🔹 7. การติดตามลูกค้า</a></li>
+                        <li><a href="#section-kpi">🔹 8. การตรวจ KPI</a></li>
+                        <li><a href="#section-preapprove">🔹 9. Pre-Approve</a></li>
+                        <li><a href="#section-documents">🔹 10. เอกสาร & อัปโหลดไฟล์</a></li>
+                        <li><a href="#section-bank">🔹 11. ส่งธนาคาร</a></li>
+                        <li><a href="#section-approval">🔹 12. ผลอนุมัติ</a></li>
+                        <li><a href="#section-debt">🔹 13. ปิดหนี้</a></li>
+                        <li><a href="#section-mortgage">🔹 14. จำนอง</a></li>
+                        <li><a href="#section-inspection">🔹 15. ตรวจห้อง</a></li>
+                        <li><a href="#section-admin">🔹 16. ผู้ดูแลระบบ</a></li>
+                        <li><a href="#section-shortcuts">🔹 17. คีย์ลัด</a></li>
+                        <li><a href="#section-troubleshoot">🔹 18. ปัญหาที่พบบ่อย</a></li>
+                    </ul>
+                </nav>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                
+                <!-- ==================== 1. แนะนำระบบ ==================== -->
+                <div class="section" id="section-intro">
+                    <h2>🔹 1. แนะนำระบบ</h2>
+                    <p><strong>CRM Condo System</strong> เป็นระบบบริหารจัดการลูกค้าและสินเชื่อสำหรับธุรกิจขายคอนโด ออกแบบมาเพื่อรองรับการทำงานตั้งแต่รับลูกค้าใหม่ ไปจนถึงการโอนกรรมสิทธิ์</p>
+                    
+                    <h4>คุณสมบัติหลัก</h4>
+                    <ul>
+                        <li>✅ เก็บข้อมูลลูกค้าและค้นหาอัตโนมัติด้วยเบอร์โทร</li>
+                        <li>✅ จัดการเคสตั้งแต่สร้างจนถึงอนุมัติ</li>
+                        <li>✅ ติดตามลูกค้าด้วย Timeline</li>
+                        <li>✅ ตรวจสอบคุณภาพ KPI</li>
+                        <li>✅ จัดการเอกสารและอัปโหลดไฟล์</li>
+                        <li>✅ ส่งธนาคารและบันทึกผลอนุมัติ</li>
+                        <li>✅ ปิดหนี้ จำนอง ตรวจห้อง</li>
+                        <li>✅ Dashboard สำหรับผู้บริหาร</li>
+                    </ul>
+                    
+                    <div class="card-info">
+                        <strong>💡 การไหลของงาน (Workflow):</strong><br>
+                        ลูกค้า → เคส → ติดตาม → KPI → Pre-Approve → เอกสาร → ส่งธนาคาร → อนุมัติ → ปิดหนี้ → จำนอง → ตรวจห้อง → โอน
+                    </div>
+                </div>
+
+                <!-- ==================== 2. การเข้าสู่ระบบ ==================== -->
+                <div class="section" id="section-login">
+                    <h2>🔹 2. การเข้าสู่ระบบ</h2>
+                    
+                    <h4>ขั้นตอนการเข้าสู่ระบบ</h4>
+                    <p><span class="step-number">1</span> เปิดเว็บเบราว์เซอร์และเข้าสู่ URL ของระบบ</p>
+                    <p><span class="step-number">2</span> กรอก <strong>อีเมล</strong> และ <strong>รหัสผ่าน</strong> ที่ได้รับจากผู้ดูแลระบบ</p>
+                    <p><span class="step-number">3</span> คลิกปุ่ม <strong>"เข้าสู่ระบบ"</strong></p>
+                    
+                    <div class="card-info">
+                        <strong>🔑 บัญชีตัวอย่าง:</strong><br>
+                        Admin: admin@company.com<br>
+                        Admin Page: somsri@company.com<br>
+                        KPI: wichan@company.com<br>
+                        Support: mana@company.com<br>
+                        <small>รหัสผ่านเริ่มต้น: 123456</small>
+                    </div>
+                    
+                    <div class="card-warning">
+                        <strong>⚠️ คำเตือน:</strong> ควรเปลี่ยนรหัสผ่านหลังเข้าสู่ระบบครั้งแรก
+                    </div>
+                    
+                    <h4>การออกจากระบบ</h4>
+                    <p>คลิกที่ไอคอน <strong>⋮</strong> มุมล่างซ้ายของ Sidebar → เลือก <strong>"ออกจากระบบ"</strong></p>
+                    <p>หรือใช้คีย์ลัด: <span class="keyboard-key">Ctrl</span> + <span class="keyboard-key">Shift</span> + <span class="keyboard-key">L</span></p>
+                    
+                    <div class="card-danger">
+                        <strong>🚫 ระบบจะออกจากระบบอัตโนมัติ:</strong> หากไม่มีการใช้งานเกิน 30 นาที
+                    </div>
+                </div>
+
+                <!-- ==================== 3. Roles ==================== -->
+                <div class="section" id="section-roles">
+                    <h2>🔹 3. Roles และสิทธิ์การใช้งาน</h2>
+                    
+                    <table class="table table-bordered role-table">
+                        <thead>
+                            <tr><th>Role</th><th>หน้าที่</th><th>เมนูที่เข้าถึงได้</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>👑 <strong>Admin</strong></td>
+                                <td>ผู้ดูแลระบบสูงสุด</td>
+                                <td>ทุกเมนู + จัดการผู้ใช้ + ตั้งค่าระบบ + Executive Dashboard</td>
+                            </tr>
+                            <tr>
+                                <td>📄 <strong>Admin Page</strong></td>
+                                <td>พนักงานขาย/แอดมินเพจ</td>
+                                <td>ข้อมูลลูกค้า, เคสทั้งหมด, ติดตาม, Dashboard</td>
+                            </tr>
+                            <tr>
+                                <td>✅ <strong>KPI</strong></td>
+                                <td>ผู้ตรวจสอบคุณภาพ</td>
+                                <td>ตรวจ KPI, Dashboard</td>
+                            </tr>
+                            <tr>
+                                <td>🔧 <strong>Support</strong></td>
+                                <td>ฝ่ายสนับสนุน</td>
+                                <td>Pre-Approve, เอกสาร, ส่งธนาคาร, อนุมัติ, ปิดหนี้, จำนอง, ตรวจห้อง</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ==================== 4. Dashboard ==================== -->
+                <div class="section" id="section-dashboard">
+                    <h2>🔹 4. Dashboard</h2>
+                    <p>Dashboard เป็นหน้าแรกหลังเข้าสู่ระบบ แสดงสถิติสำคัญและข้อมูลสรุป</p>
+                    
+                    <h4>ข้อมูลที่แสดง</h4>
+                    <ul>
+                        <li>📊 <strong>การ์ดสถิติ:</strong> เคสทั้งหมด, อนุมัติแล้ว, กำลังติดตาม, ยกเลิก</li>
+                        <li>📈 <strong>กราฟ:</strong> แนวโน้มเคสรายเดือน, KPI ภาพรวม</li>
+                        <li>📋 <strong>เคสล่าสุด:</strong> 5 เคสล่าสุดที่ถูกสร้าง</li>
+                        <li>🔔 <strong>กิจกรรม:</strong> Timeline การทำงานล่าสุด</li>
+                        <li>🏆 <strong>Top Performers:</strong> พนักงานที่มีผลงานดี</li>
+                    </ul>
+                    
+                    <div class="card-tip">
+                        <strong>💡 เคล็ดลับ:</strong> คลิกที่การ์ดสถิติเพื่อกรองดูเฉพาะเคสสถานะนั้นๆ
+                    </div>
+                </div>
+
+                <!-- ==================== 5. การจัดการลูกค้า ==================== -->
+                <div class="section" id="section-customer">
+                    <h2>🔹 5. การจัดการลูกค้า</h2>
+                    
+                    <h4>การเพิ่มลูกค้าใหม่</h4>
+                    <p><span class="step-number">1</span> ไปที่เมนู <strong>"ข้อมูลลูกค้า"</strong></p>
+                    <p><span class="step-number">2</span> คลิกปุ่ม <strong>"เพิ่มลูกค้าใหม่"</strong></p>
+                    <p><span class="step-number">3</span> กรอกข้อมูลตามฟอร์ม:</p>
+                    <ul>
+                        <li><strong>ชื่อ-นามสกุล</strong> *จำเป็น</li>
+                        <li><strong>เบอร์โทร</strong> *จำเป็น</li>
+                        <li>Facebook, Line ID, เพจ</li>
+                        <li>ช่องทาง (FB, TikTok, Line)</li>
+                        <li>เกรด (A+, A, B)</li>
+                        <li>โครงการที่สนใจ, ราคา, เงินทอน</li>
+                        <li>ข้อมูลการทำงาน: บริษัท, อายุงาน, สวัสดิการ, ภาระหนี้</li>
+                    </ul>
+                    
+                    <div class="card-info">
+                        <strong>🔍 Auto-Fill:</strong> เมื่อกรอกเบอร์โทร ระบบจะค้นหาลูกค้าเดิมอัตโนมัติ ถ้าพบจะเติมข้อมูลให้
+                    </div>
+                    
+                    <h4>การส่งเคส</h4>
+                    <p>หลังจากบันทึกข้อมูลลูกค้า ปุ่ม <strong>"ส่งเคส"</strong> จะปรากฏขึ้น → คลิกเพื่อสร้างเคสใหม่</p>
+                    
+                    <h4>การค้นหาและกรอง</h4>
+                    <p>ใช้ช่องค้นหาและ Dropdown กรองตามช่องทาง, เกรด, โครงการ, ภาระหนี้</p>
+                </div>
+
+                <!-- ==================== 6. การจัดการเคส ==================== -->
+                <div class="section" id="section-case">
+                    <h2>🔹 6. การจัดการเคส</h2>
+                    
+                    <h4>การดูเคสทั้งหมด</h4>
+                    <p>ไปที่เมนู <strong>"เคสทั้งหมด"</strong> → แสดงตารางเคสทั้งหมด มีการ์ดสรุปสถานะและตัวกรอง</p>
+                    
+                    <h4>การเปิดรายละเอียดเคส</h4>
+                    <p>คลิกที่ <strong>Case ID</strong> เพื่อเปิดหน้ารายละเอียดเคส ซึ่งมี <strong>10 Tabs</strong> สำหรับจัดการแต่ละขั้นตอน</p>
+                    
+                    <h4>10 Tabs ในรายละเอียดเคส</h4>
+                    <ol>
+                        <li>👤 ข้อมูลลูกค้า</li>
+                        <li>📞 ติดตาม</li>
+                        <li>✅ KPI</li>
+                        <li>📋 Pre-Approve</li>
+                        <li>📄 เอกสาร</li>
+                        <li>🏦 ส่งธนาคาร</li>
+                        <li>💰 อนุมัติ</li>
+                        <li>💳 ปิดหนี้</li>
+                        <li>🏠 จำนอง</li>
+                        <li>🔍 ตรวจห้อง</li>
+                    </ol>
+                    
+                    <h4>การเปลี่ยนสถานะเคส</h4>
+                    <p>คลิกปุ่ม <i class="fas fa-edit"></i> ในตารางเคส → เลือกสถานะใหม่</p>
+                </div>
+
+                <!-- ==================== 7. การติดตาม ==================== -->
+                <div class="section" id="section-follow">
+                    <h2>🔹 7. การติดตามลูกค้า</h2>
+                    <p>การติดตามทำผ่าน <strong>Tab "📞 ติดตาม"</strong> ในหน้ารายละเอียดเคส</p>
+                    
+                    <h4>การเพิ่มการติดตาม</h4>
+                    <p><span class="step-number">1</span> ไปที่ Tab ติดตามในหน้ารายละเอียดเคส</p>
+                    <p><span class="step-number">2</span> คลิก <strong>"เพิ่มการติดตาม"</strong></p>
+                    <p><span class="step-number">3</span> เลือกสถานะ:</p>
+                    <ul>
+                        <li>✅ สนใจ</li>
+                        <li>🌟 สนใจมาก</li>
+                        <li>⏳ รอดำเนินการ</li>
+                        <li>💬 กำลังต่อรอง</li>
+                        <li>🏢 นัดดูห้อง</li>
+                        <li>📄 ส่งเอกสารแล้ว</li>
+                        <li>❌ ไม่สนใจ</li>
+                        <li>🚫 ยกเลิก</li>
+                    </ul>
+                    <p><span class="step-number">4</span> บันทึกรายละเอียดและเลือกช่องทางที่ติดต่อ</p>
+                    <p><span class="step-number">5</span> คลิก <strong>"บันทึก"</strong></p>
+                    
+                    <div class="card-info">
+                        <strong>📱 ช่องทางติดต่อ:</strong> โทรศัพท์, Line, Facebook, แชท, พบลูกค้า
+                    </div>
+                </div>
+
+                <!-- ==================== 8. KPI ==================== -->
+                <div class="section" id="section-kpi">
+                    <h2>🔹 8. การตรวจ KPI</h2>
+                    <p>สำหรับผู้ใช้ Role <strong>KPI</strong> หรือ <strong>Admin</strong></p>
+                    
+                    <h4>การตรวจ KPI</h4>
+                    <p><span class="step-number">1</span> ไปที่เมนู <strong>"ตรวจ KPI"</strong></p>
+                    <p><span class="step-number">2</span> ดูรายการรอตรวจในตาราง</p>
+                    <p><span class="step-number">3</span> คลิก <strong>"ตรวจ"</strong> → เลือกผล ผ่าน/ไม่ผ่าน → เลือกเหตุผล</p>
+                    
+                    <h4>การตรวจแบบเร็ว</h4>
+                    <p>ใช้ช่อง <strong>"ตรวจ KPI ด่วน"</strong> ด้านขวา → กรอก Case ID → เลือกผล → บันทึก</p>
+                    
+                    <h4>เหตุผลที่ไม่ผ่าน</h4>
+                    <ul>
+                        <li>ไม่ตามลูกค้า</li>
+                        <li>ลูกค้าไม่ตอบ</li>
+                        <li>ติดบูโร</li>
+                        <li>อายุงานไม่ถึง</li>
+                        <li>รายได้ไม่ถึง</li>
+                        <li>เอกสารไม่ครบ</li>
+                    </ul>
+                </div>
+
+                <!-- ==================== 9-15: Support Modules ==================== -->
+                <div class="section" id="section-preapprove">
+                    <h2>🔹 9. Pre-Approve (อนุมัติเบื้องต้น)</h2>
+                    <p>สำหรับ Role <strong>Support</strong> หรือ <strong>Admin</strong></p>
+                    <p>ไปที่ Tab <strong>"📋 Pre-Approve"</strong> ในหน้ารายละเอียดเคส → เลือกสถานะ (กำลังดำเนินการ/อนุมัติ/ปฏิเสธ) → ระบุวงเงิน → บันทึก</p>
+                </div>
+
+                <div class="section" id="section-documents">
+                    <h2>🔹 10. เอกสาร & อัปโหลดไฟล์</h2>
+                    
+                    <h4>สถานะเอกสาร</h4>
+                    <p>จัดการสถานะเอกสาร 3 ขั้นตอน: ผ่าน/ไม่ผ่าน/รอดำเนินการ</p>
+                    <p>Pre-Check และสถานะปิดหนี้</p>
+                    
+                    <h4>การอัปโหลดไฟล์</h4>
+                    <p><span class="step-number">1</span> เลือก <strong>ประเภทเอกสาร</strong> (บัตรประชาชน, ทะเบียนบ้าน, สลิปเงินเดือน ฯลฯ)</p>
+                    <p><span class="step-number">2</span> เลือกไฟล์ (รองรับ .jpg, .png, .pdf สูงสุด 5MB)</p>
+                    <p><span class="step-number">3</span> คลิก <strong>"อัปโหลด"</strong></p>
+                    
+                    <h4>ประเภทเอกสารที่รองรับ</h4>
+                    <ul>
+                        <li>🪪 บัตรประชาชน</li>
+                        <li>🏠 ทะเบียนบ้าน</li>
+                        <li>📄 สลิปเงินเดือน</li>
+                        <li>📊 Statement ย้อนหลัง 6 เดือน</li>
+                        <li>📝 หนังสือรับรองเงินเดือน</li>
+                        <li>✍️ สัญญาซื้อขาย</li>
+                        <li>📜 สำเนาโฉนด</li>
+                        <li>🏦 สำเนาบัญชีธนาคาร</li>
+                    </ul>
+                </div>
+
+                <div class="section" id="section-bank">
+                    <h2>🔹 11. ส่งธนาคาร</h2>
+                    <p>ไปที่ Tab <strong>"🏦 ส่งธนาคาร"</strong> → เลือกธนาคาร → วันที่ส่ง → หมายเหตุ → บันทึก</p>
+                    <p>ระบบจะแสดงประวัติการส่งธนาคารทั้งหมด</p>
+                </div>
+
+                <div class="section" id="section-approval">
+                    <h2>🔹 12. ผลอนุมัติ</h2>
+                    <p>ไปที่ Tab <strong>"💰 อนุมัติ"</strong> → กรอกวงเงินแยกตามประเภท:</p>
+                    <ul>
+                        <li>วงเงินห้อง</li>
+                        <li>วงเงินประกัน</li>
+                        <li>วงเงินเฟอร์นิเจอร์</li>
+                    </ul>
+                    <p>ระบบคำนวณวงเงินรวมอัตโนมัติ</p>
+                    <p>ระบุวันเซ็นสัญญาและวันโอน</p>
+                    
+                    <div class="card-tip">
+                        <strong>📋 Copy ส่ง LINE:</strong> คลิกปุ่มสีเขียวเพื่อคัดลอกข้อความสรุปส่ง LINE
+                    </div>
+                </div>
+
+                <div class="section" id="section-debt">
+                    <h2>🔹 13. ปิดหนี้</h2>
+                    <p>ไปที่ Tab <strong>"💳 ปิดหนี้"</strong></p>
+                    <p><span class="step-number">1</span> กรอกวันที่ปิดหนี้, สถานที่, เจ้าหน้าที่</p>
+                    <p><span class="step-number">2</span> คลิก <strong>"+"</strong> เพื่อเพิ่มรายการหนี้</p>
+                    <p><span class="step-number">3</span> กรอกรายละเอียดและจำนวนเงิน</p>
+                    <p><span class="step-number">4</span> ระบบคำนวณยอดรวมอัตโนมัติ</p>
+                    <p><span class="step-number">5</span> คลิก <strong>"บันทึก"</strong></p>
+                </div>
+
+                <div class="section" id="section-mortgage">
+                    <h2>🔹 14. จำนอง</h2>
+                    <p>ไปที่ Tab <strong>"🏠 จำนอง"</strong> → กรอกข้อมูล: วันที่จำนอง, ธนาคาร, ชื่อบัญชี, เลขบัญชี, วงเงินอนุมัติ → บันทึก</p>
+                </div>
+
+                <div class="section" id="section-inspection">
+                    <h2>🔹 15. ตรวจห้อง</h2>
+                    <p><span class="step-number">1</span> ไปที่ Tab <strong>"🔍 ตรวจห้อง"</strong></p>
+                    <p><span class="step-number">2</span> คลิก <strong>"เพิ่มการตรวจ"</strong></p>
+                    <p><span class="step-number">3</span> เลือกครั้งที่ (1-3), วันที่ตรวจ, สถานะ (ผ่าน/ไม่ผ่าน)</p>
+                    <p><span class="step-number">4</span> บันทึกหมายเหตุจุดที่พบ</p>
+                    <p><span class="step-number">5</span> <strong>อัปโหลดรูปภาพ</strong> (สูงสุด 5 รูป) เพื่อเก็บหลักฐาน</p>
+                    <p><span class="step-number">6</span> คลิก <strong>"บันทึก"</strong></p>
+                    
+                    <div class="card-tip">
+                        <strong>📸 รูปภาพประกอบ:</strong> คลิกที่รูปเพื่อดูขนาดใหญ่ใน Lightbox
+                    </div>
+                </div>
+
+                <!-- ==================== 16. ผู้ดูแลระบบ ==================== -->
+                <div class="section" id="section-admin">
+                    <h2>🔹 16. ผู้ดูแลระบบ (Admin)</h2>
+                    
+                    <h4>เมนูสำหรับ Admin</h4>
+                    <ul>
+                        <li><strong>จัดการผู้ใช้:</strong> เพิ่ม/แก้ไข/ลบ ผู้ใช้งาน</li>
+                        <li><strong>ข้อมูลหลัก (Master Data):</strong> จัดการ dropdown ทั้งหมด (ช่องทาง, โซน, ธนาคาร, สวัสดิการ, ประเภทเอกสาร)</li>
+                        <li><strong>จัดการโครงการ:</strong> เพิ่ม/แก้ไข/ลบ โครงการ</li>
+                        <li><strong>ตั้งค่าระบบ:</strong> ตั้งค่าทั่วไป, LINE Notify, สำรองข้อมูล</li>
+                        <li><strong>บันทึกระบบ:</strong> ดูประวัติการใช้งานทั้งหมด</li>
+                        <li><strong>Executive Dashboard:</strong> ดูภาพรวมทั้งบริษัทและ Export PDF</li>
+                    </ul>
+                </div>
+
+                <!-- ==================== 17. คีย์ลัด ==================== -->
+                <div class="section" id="section-shortcuts">
+                    <h2>🔹 17. คีย์ลัด</h2>
+                    <table class="table table-bordered">
+                        <tr><td style="width:200px"><span class="keyboard-key">Ctrl</span> + <span class="keyboard-key">B</span></td><td>ย่อ/ขยาย Sidebar</td></tr>
+                        <tr><td><span class="keyboard-key">Ctrl</span> + <span class="keyboard-key">Shift</span> + <span class="keyboard-key">L</span></td><td>ออกจากระบบ</td></tr>
+                        <tr><td><span class="keyboard-key">Esc</span></td><td>ปิด Modal / Popup</td></tr>
+                    </table>
+                </div>
+
+                <!-- ==================== 18. ปัญหาที่พบบ่อย ==================== -->
+                <div class="section" id="section-troubleshoot">
+                    <h2>🔹 18. ปัญหาที่พบบ่อย</h2>
+                    
+                    <h4>❌ กดปุ่มแล้วไม่ทำงาน</h4>
+                    <p><strong>วิธีแก้:</strong> รีเฟรชหน้า (F5) หรือออกจากระบบแล้วเข้าใหม่</p>
+                    
+                    <h4>❌ แสดง "Session หมดอายุ"</h4>
+                    <p><strong>วิธีแก้:</strong> เข้าสู่ระบบใหม่ ระบบจะออกจากระบบอัตโนมัติหลังไม่ใช้งาน 30 นาที</p>
+                    
+                    <h4>❌ ภาษาไทยแสดงเป็น ????</h4>
+                    <p><strong>วิธีแก้:</strong> ตรวจสอบว่าเบราว์เซอร์เข้ารหัสเป็น UTF-8</p>
+                    
+                    <h4>❌ ไม่สามารถอัปโหลดไฟล์ได้</h4>
+                    <p><strong>วิธีแก้:</strong> ตรวจสอบขนาดไฟล์ (ไม่เกิน 5MB) และนามสกุล (.jpg, .png, .pdf)</p>
+                    
+                    <h4>❌ กราฟไม่แสดง</h4>
+                    <p><strong>วิธีแก้:</strong> รอสักครู่หรือรีเฟรชหน้า</p>
+                    
+                    <div class="card-info">
+                        <strong>📞 ติดต่อผู้ดูแลระบบ:</strong> หากพบปัญหาที่ไม่สามารถแก้ไขได้เอง
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <hr class="my-5">
+                <p class="text-center text-muted">
+                    © 2026 CRM Condo System v1.0 | คู่มือสำหรับผู้ใช้งาน | เอกสารปรับปรุงล่าสุด: <?php echo date('d/m/Y'); ?>
+                </p>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button class="btn-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="กลับด้านบน">⬆</button>
+    <button class="btn-print" onclick="window.print()" title="พิมพ์คู่มือ">🖨️</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Smooth scroll for sidebar links
+        document.querySelectorAll('.sidebar-nav a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    
+                    // Update active state
+                    document.querySelectorAll('.sidebar-nav a').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+        
+        // Show/hide back to top button
+        window.addEventListener('scroll', function() {
+            const btn = document.querySelector('.btn-top');
+            if (window.scrollY > 300) {
+                btn.style.display = 'flex';
+            } else {
+                btn.style.display = 'none';
+            }
+        });
+        
+        // Highlight active section on scroll
+        window.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.sidebar-nav a');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (window.scrollY >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
