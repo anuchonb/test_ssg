@@ -294,6 +294,13 @@ function isActiveGroup($pages)
             </a>
         </li>
 
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="nav-text">ออกจากระบบ</span>
+            </a>
+        </li>
+
     </nav>
 
     <!-- Sidebar Footer -->
