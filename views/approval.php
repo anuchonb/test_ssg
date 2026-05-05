@@ -16,7 +16,7 @@ $case_id = isset($_GET['case_id']) ? intval($_GET['case_id']) : 0;
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>✅ ผลอนุมัติ - Case #<?php echo $case_id; ?></h2>
-            <a href="case_detail.php?id=<?php echo $case_id; ?>" class="btn btn-secondary">
+            <a href="case_detail.php?case_id=<?php echo $case_id; ?>" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> กลับ
             </a>
         </div>

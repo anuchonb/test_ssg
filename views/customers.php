@@ -1095,7 +1095,7 @@ function createCase(customerId) {
                             cancelButtonText: '<i class="fas fa-times"></i> ปิด'
                         }).then((result) => {
                             if(result.isConfirmed) {
-                                window.location.href = `case_detail.php?id=${response.case_id}`;
+                                window.location.href = `case_detail.php?case_id=${response.case_id}`;
                             } else {
                                 loadCustomers(currentPage);
                                 loadCustomerStats();
@@ -1122,7 +1122,7 @@ function createCase(customerId) {
 }
 
 function viewCase(caseId) {
-    window.location.href = `case_detail.php?id=${caseId}`;
+    window.location.href = `case_detail.php?case_id=${caseId}`;
 }
 
 function confirmDeleteCustomer(id, name) {

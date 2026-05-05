@@ -458,7 +458,7 @@ function loadPendingKpi() {
                 let html = '';
                 response.data.forEach(function(item) {
                     html += '<tr>' +
-                        '<td><a href="case_detail.php?id=' + item.case_id + '" class="fw-bold">#' + item.case_id + '</a></td>' +
+                        '<td><a href="case_detail.php?case_id=' + item.case_id + '" class="fw-bold">#' + item.case_id + '</a></td>' +
                         '<td>' + (item.customer_name || '-') + '</td>' +
                         '<td>' + (item.phone || '-') + '</td>' +
                         '<td>' + (item.owner_name || '-') + '</td>' +

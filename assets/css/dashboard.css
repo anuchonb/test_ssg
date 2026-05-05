@@ -39,6 +39,18 @@ body {
     box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
 }
 
+.sidebar-heading {
+    padding: 10px 20px 5px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.4);
+    font-weight: 600;
+}
+.sidebar.collapsed .sidebar-heading {
+    display: none;
+}
+
 .sidebar.collapsed {
     width: var(--sidebar-collapsed-width);
 }

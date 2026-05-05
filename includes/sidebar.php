@@ -89,6 +89,18 @@ function isActiveGroup($pages)
             </a>
         </li>
 
+        <!-- ✅ เพิ่มเมนู Executive Dashboard (เฉพาะ admin) -->
+        <?php if ($user_role == 'admin'): ?>
+        <li class="nav-item">
+            <a class="nav-link <?php echo isActive('executive_dashboard.php'); ?>" 
+            href="executive_dashboard.php">
+                <i class="fas fa-chart-bar"></i>
+                <span class="nav-text">Executive Dashboard</span>
+                <small class="text-white-50 ms-auto"></small>
+            </a>
+        </li>
+        <?php endif; ?>
+
         <div class="sidebar-divider"></div>
 
         <!-- Customer -->
