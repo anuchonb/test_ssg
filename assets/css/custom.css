@@ -1,0 +1,256 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Sarabun', sans-serif;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 450px;
+    padding: 20px;
+}
+
+.login-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+.login-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 30px;
+    text-align: center;
+    color: white;
+}
+
+.login-header i {
+    font-size: 50px;
+    margin-bottom: 10px;
+}
+
+.login-header h3 {
+    margin: 10px 0 0 0;
+    font-weight: bold;
+}
+
+.login-body {
+    padding: 30px;
+}
+
+.form-control {
+    border-radius: 10px;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.input-group-text {
+    border-radius: 10px 0 0 10px;
+    background: #f8f9fa;
+    border: 2px solid #e0e0e0;
+    border-right: none;
+}
+
+.input-group .form-control {
+    border-left: none;
+}
+
+.btn-login {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-weight: bold;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.password-toggle {
+    cursor: pointer;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-left: none;
+    border-radius: 0 10px 10px 0;
+    background: white;
+}
+
+.login-footer {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-size: 14px;
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    color: white;
+    margin: 5px;
+}
+
+.role-admin {
+    background: #ff6b6b;
+}
+
+.role-admin_page {
+    background: #4ecdc4;
+}
+
+.role-kpi {
+    background: #f9ca24;
+}
+
+.role-support {
+    background: #a55eea;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-10px);
+    }
+
+    75% {
+        transform: translateX(10px);
+    }
+}
+
+.shake {
+    animation: shake 0.3s ease-in-out;
+}
+
+/* ============ SIDEBAR ADDITIONAL STYLES ============ */
+
+.sidebar-heading {
+    padding: 10px 20px 5px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    position: sticky;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.1);
+    margin-top: auto;
+}
+
+.sidebar-user {
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #667eea;
+}
+
+.sidebar-user .user-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.sidebar-user .user-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.sidebar-user .user-name {
+    font-weight: 600;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-user .user-role {
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+.sidebar.collapsed .sidebar-heading,
+.sidebar.collapsed .nav-text,
+.sidebar.collapsed .badge,
+.sidebar.collapsed .user-info,
+.sidebar.collapsed .sidebar-header h4,
+.sidebar.collapsed .sidebar-header small,
+.sidebar.collapsed .sidebar-footer .btn span,
+.sidebar.collapsed .dropdown-toggle {
+    display: none !important;
+}
+
+.sidebar.collapsed .sidebar-header {
+    padding: 15px 5px;
+}
+
+.sidebar.collapsed .sidebar-header i {
+    font-size: 25px;
+}
+
+.sidebar.collapsed .nav-link {
+    justify-content: center;
+    padding: 12px 5px;
+    text-align: center;
+}
+
+.sidebar.collapsed .nav-link i {
+    margin-right: 0;
+    font-size: 20px;
+}
+
+.sidebar.collapsed .sidebar-user {
+    justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-footer {
+    text-align: center;
+}
+
+.sidebar.collapsed .sidebar-footer .btn {
+    padding: 8px;
+}
+
+.sidebar.collapsed .sidebar-footer .btn i {
+    margin: 0;
+}
