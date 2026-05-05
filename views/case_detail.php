@@ -679,27 +679,166 @@ function getFileIconColor(fileType) {
     return 'secondary';
 }
 
-// ========== BANK ==========
+// ========== BANK (แก้ไขใหม่) ==========
 function loadBankList(){
-    let html='<form><div class="row"><div class="col-md-6 mb-3"><label>ธนาคาร</label><select class="form-select" id="bank_name"><option value="">เลือก</option><option>ธนาคารกรุงเทพ</option><option>ธนาคารกสิกรไทย</option><option>ธนาคารกรุงไทย</option><option>ธนาคารไทยพาณิชย์</option><option>ธนาคารออมสิน</option><option>ธนาคารอาคารสงเคราะห์</option></select></div><div class="col-md-6 mb-3"><label>วันที่ส่ง</label><input type="date" class="form-control" id="bank_date"></div></div><div class="mb-3"><label>หมายเหตุ</label><textarea class="form-control" id="bank_note" rows="2"></textarea></div><button type="button" class="btn btn-primary" onclick="saveBank()">บันทึก</button></form><hr><h6>ประวัติการส่ง</h6><div id="bankHistory">กำลังโหลด...</div>';
+    let html = 
+    '<div class="row">' +
+        // ฟอร์มส่งธนาคาร
+        '<div class="col-md-6">' +
+            '<div class="card">' +
+                '<div class="card-header bg-primary text-white"><h6 class="mb-0"><i class="fas fa-university"></i> บันทึกการส่งธนาคาร</h6></div>' +
+                '<div class="card-body">' +
+                    '<form>' +
+                        '<div class="mb-2">' +
+                            '<label class="form-label">ธนาคาร <span class="text-danger">*</span></label>' +
+                            '<select class="form-select" id="bank_name">' +
+                                '<option value="">เลือกธนาคาร</option>' +
+                                '<option value="ธนาคารกรุงเทพ">ธนาคารกรุงเทพ</option>' +
+                                '<option value="ธนาคารกสิกรไทย">ธนาคารกสิกรไทย</option>' +
+                                '<option value="ธนาคารกรุงไทย">ธนาคารกรุงไทย</option>' +
+                                '<option value="ธนาคารไทยพาณิชย์">ธนาคารไทยพาณิชย์</option>' +
+                                '<option value="ธนาคารออมสิน">ธนาคารออมสิน</option>' +
+                                '<option value="ธนาคารอาคารสงเคราะห์">ธนาคารอาคารสงเคราะห์</option>' +
+                            '</select>' +
+                        '</div>' +
+                        '<div class="mb-2">' +
+                            '<label class="form-label">วันที่ส่ง</label>' +
+                            '<input type="date" class="form-control" id="bank_date" value="' + getTodayDate() + '">' +
+                        '</div>' +
+                        '<div class="mb-2">' +
+                            '<label class="form-label">หมายเหตุ</label>' +
+                            '<textarea class="form-control" id="bank_note" rows="2" placeholder="หมายเหตุเพิ่มเติม"></textarea>' +
+                        '</div>' +
+                        '<button type="button" class="btn btn-primary" onclick="saveBank()"><i class="fas fa-save"></i> บันทึก</button>' +
+                    '</form>' +
+                '</div>' +
+            '</div>' +
+        '</div>' +
+        // ประวัติการส่งธนาคาร
+        '<div class="col-md-6">' +
+            '<div class="card">' +
+                '<div class="card-header bg-info text-white"><h6 class="mb-0"><i class="fas fa-history"></i> ประวัติการส่งธนาคาร</h6></div>' +
+                '<div class="card-body">' +
+                    '<div id="bankHistory" style="max-height: 400px; overflow-y: auto;">' +
+                        '<div class="text-center py-4"><div class="spinner-border spinner-border-sm"></div> กำลังโหลด...</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+        '</div>' +
+    '</div>';
+    
     $('#bankContent').html(html);
+    
+    // ✅ โหลดประวัติ
     loadBankHistory();
 }
+
 function saveBank(){
-    let data={case_id:CASE_ID, bank_name:$('#bank_name').val(), submit_date:$('#bank_date').val(), note:$('#bank_note').val()};
-    $.post('../api/bank/submit.php',JSON.stringify(data),function(res){
-        alert(res.success?'บันทึกสำเร็จ!':'ผิดพลาด: '+res.message);
-        if(res.success) loadBankHistory();
-    },'json');
+    let bankName = $('#bank_name').val();
+    let submitDate = $('#bank_date').val();
+    let note = $('#bank_note').val() || '';
+    
+    if(!bankName) {
+        alert('กรุณาเลือกธนาคาร');
+        $('#bank_name').focus();
+        return;
+    }
+    
+    if(!confirm('บันทึกการส่งธนาคาร ' + bankName + '?')) return;
+    
+    let data = {
+        case_id: CASE_ID,
+        bank_name: bankName,
+        submit_date: submitDate,
+        note: note
+    };
+    
+    $.ajax({
+        url: '../api/bank/submit.php',
+        type: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(res) {
+            console.log('Bank save response:', res);
+            
+            if(res.success) {
+                alert('บันทึกสำเร็จ!');
+                $('#bank_note').val('');
+                // ✅ โหลดประวัติใหม่
+                loadBankHistory();
+            } else {
+                alert('ผิดพลาด: ' + (res.message || 'ไม่สามารถบันทึกได้'));
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Bank save error:', status, error);
+            alert('ไม่สามารถบันทึกได้ (Status: ' + xhr.status + ')');
+        }
+    });
 }
-function loadBankHistory(){
-    $.get('../api/bank/list.php',{case_id:CASE_ID},function(res){
-        if(res.success&&res.data&&res.data.length>0){
-            let html='<ul class="list-group">';
-            res.data.forEach(function(b){ html+='<li class="list-group-item"><strong>'+b.bank_name+'</strong> - '+b.submit_date+'<br><small>'+b.note+'</small></li>'; });
-            html+='</ul>'; $('#bankHistory').html(html);
-        }else{ $('#bankHistory').html('<p class="text-muted">ยังไม่มีการส่งธนาคาร</p>'); }
-    },'json');
+
+function loadBankHistory() {
+    console.log('Loading bank history for case:', CASE_ID);
+    
+    $.ajax({
+        url: '../api/bank/list.php',
+        type: 'GET',
+        data: { case_id: CASE_ID },
+        dataType: 'json',
+        timeout: 10000,
+        success: function(res) {
+            console.log('Bank history response:', res);
+            
+            if(res.success && res.data && res.data.length > 0) {
+                let html = '<div class="list-group list-group-flush">';
+                
+                res.data.forEach(function(b, index) {
+                    html += 
+                    '<div class="list-group-item py-2">' +
+                        '<div class="d-flex justify-content-between align-items-start">' +
+                            '<div>' +
+                                '<strong>' + (b.bank_name || 'ไม่ระบุ') + '</strong>' +
+                                '<br><small class="text-muted">📅 ' + (b.submit_date || '-') + '</small>' +
+                                (b.note ? '<br><small>' + b.note + '</small>' : '') +
+                            '</div>' +
+                            '<span class="badge bg-info">ครั้งที่ ' + (res.data.length - index) + '</span>' +
+                        '</div>' +
+                    '</div>';
+                });
+                
+                html += '</div>';
+                $('#bankHistory').html(html);
+            } else {
+                $('#bankHistory').html(
+                    '<div class="text-center py-4 text-muted">' +
+                        '<i class="fas fa-university fa-3x mb-2"></i>' +
+                        '<p>ยังไม่มีประวัติการส่งธนาคาร</p>' +
+                    '</div>'
+                );
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Bank history error:', status, error);
+            console.error('Response:', xhr.responseText);
+            
+            $('#bankHistory').html(
+                '<div class="alert alert-danger py-2">' +
+                    '<small>❌ ไม่สามารถโหลดประวัติได้ (Status: ' + xhr.status + ')</small>' +
+                    '<br><button class="btn btn-sm btn-outline-danger mt-1" onclick="loadBankHistory()">ลองใหม่</button>' +
+                '</div>'
+            );
+        }
+    });
+}
+
+// Helper: Get today date
+function getTodayDate() {
+    let today = new Date();
+    let yyyy = today.getFullYear();
+    let mm = String(today.getMonth() + 1).padStart(2, '0');
+    let dd = String(today.getDate()).padStart(2, '0');
+    return yyyy + '-' + mm + '-' + dd;
 }
 
 // ========== APPROVAL ==========

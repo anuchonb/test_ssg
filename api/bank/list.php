@@ -11,7 +11,10 @@ $db = $database->getConnection();
 $case_id = isset($_GET['case_id']) ? intval($_GET['case_id']) : 0;
 
 if (!$case_id) {
-    echo json_encode(["success" => false, "message" => "กรุณาระบุ Case ID"]);
+    echo json_encode([
+        "success" => false,
+        "message" => "กรุณาระบุ Case ID"
+    ]);
     exit();
 }
 
@@ -30,7 +33,7 @@ try {
     http_response_code(500);
     echo json_encode([
         "success" => false,
-        "message" => $e->getMessage()
+        "message" => "Database error: " . $e->getMessage()
     ]);
 }
 ?>

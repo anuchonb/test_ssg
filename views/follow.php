@@ -134,17 +134,6 @@ $case_id = isset($_GET['case_id']) ? intval($_GET['case_id']) : 0;
                         <textarea class="form-control" id="follow_note" rows="4" 
                             placeholder="บันทึกรายละเอียดการติดต่อ..."></textarea>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">ไฟล์แนบ</label>
-                        <input type="file" class="form-control" id="follow_file" multiple>
-                        <small class="text-muted">รองรับไฟล์ .jpg, .png, .pdf (สูงสุด 5MB)</small>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">นัดหมายครั้งต่อไป</label>
-                        <input type="datetime-local" class="form-control" id="follow_next_date">
-                    </div>
                 </form>
             </div>
             <div class="modal-footer">

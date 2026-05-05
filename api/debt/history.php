@@ -10,14 +10,24 @@ $db = $database->getConnection();
 
 $case_id = isset($_GET['case_id']) ? intval($_GET['case_id']) : 0;
 
-if($case_id) {
-    $query = "SELECT * FROM debt_clearings WHERE case_id = :case_id ORDER BY created_at DESC";
+if (!$case_id) {
+    echo json_encode(["success" => false, "message" => "กรุณาระบุ Case ID"]);
+    exit();
+}
+
+try {
+    $query = "SELECT * FROM debt_clearings WHERE case_id = ? ORDER BY created_at DESC";
     $stmt = $db->prepare($query);
-    $stmt->bindParam(':case_id', $case_id, PDO::PARAM_INT);
-    $stmt->execute();
-    $data = $stmt->fetchAll();
-    
-    http_response_code(200);
-    echo json_encode(["success" => true, "data" => $data]);
+    $stmt->execute([$case_id]);
+    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    echo json_encode([
+        "success" => true,
+        "data" => $data
+    ], JSON_UNESCAPED_UNICODE);
+
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode(["success" => false, "message" => $e->getMessage()]);
 }
 ?>

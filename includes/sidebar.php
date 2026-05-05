@@ -119,7 +119,7 @@ function isActiveGroup($pages)
                 <a class="nav-link <?php echo isActive('cases.php'); ?>" href="cases.php">
                     <i class="fas fa-folder-open"></i>
                     <span class="nav-text">เคสทั้งหมด</span>
-                    <span class="badge bg-warning text-dark ms-auto" id="menuCaseCount">0</span>
+                    <span class="badge bg-warning ms-auto" id="menuCaseCount">0</span>
                 </a>
             </li>
         <?php endif; ?>
@@ -347,12 +347,5 @@ function isActiveGroup($pages)
         </div>
     </div>
 </div>
-
-<button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">☰</button>
-
-<!-- Sidebar Toggle Button (Mobile/Desktop) -->
-<button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="ย่อ/ขยายเมนู">
-    <i class="fas fa-bars"></i>
-</button>
 
 <script src="../assets/js/sidebar.js"></script>

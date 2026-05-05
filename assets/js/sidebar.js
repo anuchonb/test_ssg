@@ -1,50 +1,79 @@
-// ============ SIDEBAR FUNCTIONS ============// ============ SIDEBAR FUNCTIONS ============
+// ============ SIDEBAR TOGGLE ============
 
-// ✅ ประกาศ toggleSidebar ใน global scope
 function toggleSidebar() {
-  const sidebar = document.getElementById("sidebar");
-  if (sidebar) {
-    sidebar.classList.toggle("collapsed");
-    const isCollapsed = sidebar.classList.contains("collapsed");
-    localStorage.setItem("sidebarCollapsed", isCollapsed);
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.querySelector('.main-content');
+    const toggleBtn = document.getElementById('sidebarToggle');
+    
+    // Toggle class
+    sidebar.classList.toggle('collapsed');
+    
+    // เก็บสถานะ
+    const isCollapsed = sidebar.classList.contains('collapsed');
+    localStorage.setItem('sidebarCollapsed', isCollapsed);
+    
+    // อัปเดตตำแหน่งปุ่ม
     updateToggleButton();
-  }
+    
+    // Mobile: toggle expanded
+    if (window.innerWidth <= 768) {
+        sidebar.classList.toggle('mobile-expanded');
+    }
 }
 
-// Update toggle button position
 function updateToggleButton() {
-  const sidebar = document.getElementById("sidebar");
-  const toggleBtn = document.getElementById("sidebarToggle");
-  if (sidebar && toggleBtn) {
-    const sidebarWidth = sidebar.classList.contains("collapsed") ? 70 : 250;
-    toggleBtn.style.left = sidebarWidth + 15 + "px";
-  }
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('sidebarToggle');
+    
+    if (toggleBtn) {
+        const isCollapsed = sidebar.classList.contains('collapsed');
+        const sidebarWidth = isCollapsed ? 70 : 250;
+        toggleBtn.style.left = (sidebarWidth + (window.innerWidth <= 768 ? 10 : 5)) + 'px';
+    }
 }
 
-// Load sidebar stats
-function loadSidebarStats() {
-  $.ajax({
-    url: "../api/dashboard/sidebar_stats.php",
-    type: "GET",
-    dataType: "json",
-    success: function (response) {
-      if (response.success) {
-        $("#menuCaseCount").text(response.pending_cases || "0");
-        $("#menuKpiCount").text(response.pending_kpi || "0");
-        if (response.pending_cases > 0) {
-          $("#menuCaseCount").show();
-        } else {
-          $("#menuCaseCount").hide();
+// Initialize
+$(document).ready(function() {
+    // โหลดสถานะ sidebar
+    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    
+    if (isCollapsed) {
+        $('#sidebar').addClass('collapsed');
+    }
+    
+    if (window.innerWidth <= 768) {
+        $('#sidebar').addClass('collapsed');
+    }
+    
+    updateToggleButton();
+    
+    // รีเซ็ตเมื่อ resize
+    $(window).resize(function() {
+        updateToggleButton();
+    });
+    
+    // ปิด sidebar เมื่อคลิกนอก (มือถือ)
+    $(document).on('click', function(e) {
+        if (window.innerWidth <= 768) {
+            const sidebar = $('#sidebar');
+            const toggleBtn = $('#sidebarToggle');
+            
+            if (!sidebar.is(e.target) && sidebar.has(e.target).length === 0 
+                && !toggleBtn.is(e.target)) {
+                sidebar.addClass('collapsed');
+                sidebar.removeClass('mobile-expanded');
+            }
         }
-        if (response.pending_kpi > 0) {
-          $("#menuKpiCount").show();
-        } else {
-          $("#menuKpiCount").hide();
-        }
-      }
-    },
-  });
-}
+    });
+});
+
+// Keyboard shortcut
+$(document).keydown(function(e) {
+    if (e.ctrlKey && e.key === 'b') {
+        e.preventDefault();
+        toggleSidebar();
+    }
+});
 
 function showHelp() {
   Swal.fire({

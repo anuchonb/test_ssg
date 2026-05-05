@@ -1,6 +1,6 @@
 // assets/js/case_detail.js
 
-const CASE_ID = <?php echo $case_id; ?>;
+const CASE_ID = new URLSearchParams(window.location.search).get('case_id');
 let currentFollowCount = 0;
 
 $(document).ready(function() {

@@ -15,11 +15,9 @@ include_once '../../config/database.php';
 $database = new Database();
 $db = $database->getConnection();
 
-// อ่านข้อมูล
 $raw = file_get_contents("php://input");
 $data = json_decode($raw);
 
-// ตรวจสอบข้อมูล
 if (!$data || empty($data->case_id) || empty($data->bank_name)) {
     http_response_code(400);
     echo json_encode([
@@ -35,9 +33,7 @@ try {
     $submit_date = !empty($data->submit_date) ? trim($data->submit_date) : date('Y-m-d');
     $note = isset($data->note) ? trim($data->note) : '';
 
-    // เพิ่มข้อมูล
-    $query = "INSERT INTO bank_submissions (case_id, bank_name, submit_date, note) 
-              VALUES (?, ?, ?, ?)";
+    $query = "INSERT INTO bank_submissions (case_id, bank_name, submit_date, note) VALUES (?, ?, ?, ?)";
     $stmt = $db->prepare($query);
     $stmt->execute([$case_id, $bank_name, $submit_date, $note]);
 
@@ -59,7 +55,7 @@ try {
     http_response_code(500);
     echo json_encode([
         "success" => false,
-        "message" => "เกิดข้อผิดพลาด: " . $e->getMessage()
+        "message" => "Database error: " . $e->getMessage()
     ]);
 }
 ?>
