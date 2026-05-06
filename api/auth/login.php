@@ -28,7 +28,6 @@ if(!empty($data->email) && !empty($data->password)) {
             $user = $stmt->fetch();
             
             // ในระบบจริงควรใช้ password_verify()
-            unset($user['password']); // ลบข้อมูลรหัสผ่านออกจากตัวแปรผู้ใช้เพื่อความปลอดภัย
             
             $password_hash = password_hash($data->password, PASSWORD_DEFAULT);
             
@@ -41,6 +40,8 @@ if(!empty($data->email) && !empty($data->password)) {
                 $_SESSION['user_role'] = $user['role'];
                 $_SESSION['logged_in'] = true;
                 $_SESSION['login_time'] = time();
+                
+                unset($user['password']);
                 
                 // สร้าง token (สำหรับการใช้ REST API)
                 $token = bin2hex(random_bytes(32));
