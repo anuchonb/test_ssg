@@ -239,6 +239,15 @@ if (!checkRole('admin')) {
                                         <div class="form-text">Token จะถูกเก็บอย่างปลอดภัย</div>
                                     </div>
 
+                                    
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <button type="button" class="btn btn-success" onclick="testLineNotify()">
+                                                <i class="fab fa-line"></i> ทดสอบส่งข้อความ
+                                            </button>
+                                        </div>
+                                    </div>
+
                                     <div class="mb-3">
                                         <label class="form-label">การแจ้งเตือนที่ส่งผ่าน LINE</label>
                                         <div class="form-check">
@@ -258,16 +267,13 @@ if (!checkRole('admin')) {
                                             <label class="form-check-label" for="line_daily_report">ส่งสรุปประจำวัน (18:00 น.)</label>
                                         </div>
                                     </div>
-
-                                    <div class="mb-3">
-                                        <button type="button" class="btn btn-success" onclick="testLineNotify()">
-                                            <i class="fab fa-line"></i> ทดสอบส่งข้อความ
-                                        </button>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <button type="button" class="btn btn-primary" onclick="saveAllSettings()">
+                                                <i class="fas fa-save"></i> บันทึกการตั้งค่าทั้งหมด
+                                            </button>
+                                        </div>
                                     </div>
-
-                                    <button type="button" class="btn btn-primary" onclick="saveAllSettings()">
-                                        <i class="fas fa-save"></i> บันทึกการตั้งค่าทั้งหมด
-                                    </button>
                                 </form>
                             </div>
                         </div>

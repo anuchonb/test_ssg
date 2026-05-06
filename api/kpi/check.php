@@ -5,7 +5,7 @@ header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 
-if($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
@@ -20,45 +20,51 @@ $raw = file_get_contents("php://input");
 $data = json_decode($raw);
 
 // ตรวจสอบข้อมูล
-if(!$data) {
+if (!$data || empty($data->case_id) || empty($data->result)) {
+    http_response_code(400);
     echo json_encode([
-        "success" => false, 
-        "message" => "ข้อมูลไม่ถูกต้อง"
-    ]);
-    exit();
-}
-
-if(empty($data->case_id)) {
-    echo json_encode([
-        "success" => false, 
-        "message" => "กรุณาระบุ Case ID"
-    ]);
-    exit();
-}
-
-if(empty($data->result)) {
-    echo json_encode([
-        "success" => false, 
-        "message" => "กรุณาเลือกผลการตรวจ (ผ่าน/ไม่ผ่าน)"
+        "success" => false,
+        "message" => "กรุณากรอกข้อมูลให้ครบ (case_id, result)"
     ]);
     exit();
 }
 
 try {
     $case_id = intval($data->case_id);
-    $checker_id = isset($data->checker_id) ? intval($data->checker_id) : (isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 1);
+    $checker_id = isset($data->checker_id) ? intval($data->checker_id) : (isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0);
     $result = trim($data->result);
     $reason = isset($data->reason) ? trim($data->reason) : '';
     $note = isset($data->note) ? trim($data->note) : '';
 
-    // Insert KPI check - ใช้ ? แบบง่าย
-    $query = "INSERT INTO kpi_checks (case_id, checker_id, result, reason) VALUES (?, ?, ?, ?)";
-    $stmt = $db->prepare($query);
-    $stmt->execute([$case_id, $checker_id, $result, $reason]);
+    // ตรวจสอบ result ถูกต้อง
+    if (!in_array($result, ['pass', 'fail'])) {
+        http_response_code(400);
+        echo json_encode(["success" => false, "message" => "ผลการตรวจไม่ถูกต้อง (pass/fail)"]);
+        exit();
+    }
 
-    // Log activity
-    if(isset($_SESSION['user_id'])) {
-        $action = "KPI Check: " . ($result === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน') . ($reason ? " - {$reason}" : "");
+    // ✅ ตรวจสอบว่าเคยตรวจแล้วหรือไม่
+    $checkQuery = "SELECT id FROM kpi_checks WHERE case_id = ?";
+    $checkStmt = $db->prepare($checkQuery);
+    $checkStmt->execute([$case_id]);
+
+    if ($checkStmt->rowCount() > 0) {
+        // ✅ อัปเดต
+        $query = "UPDATE kpi_checks SET checker_id = ?, result = ?, reason = ? WHERE case_id = ?";
+        $stmt = $db->prepare($query);
+        $stmt->execute([$checker_id, $result, $reason, $case_id]);
+        $message = "อัปเดตผล KPI สำเร็จ!";
+    } else {
+        // ✅ เพิ่มใหม่
+        $query = "INSERT INTO kpi_checks (case_id, checker_id, result, reason) VALUES (?, ?, ?, ?)";
+        $stmt = $db->prepare($query);
+        $stmt->execute([$case_id, $checker_id, $result, $reason]);
+        $message = "บันทึกผล KPI สำเร็จ!";
+    }
+
+    // ✅ บันทึก Activity Log
+    if (isset($_SESSION['user_id'])) {
+        $action = "KPI Check: " . ($result === 'pass' ? '✅ ผ่าน' : '❌ ไม่ผ่าน') . ($reason ? " - {$reason}" : "");
         $logQuery = "INSERT INTO case_activities (case_id, action, user_id) VALUES (?, ?, ?)";
         $logStmt = $db->prepare($logQuery);
         $logStmt->execute([$case_id, $action, $_SESSION['user_id']]);
@@ -66,13 +72,19 @@ try {
 
     echo json_encode([
         "success" => true,
-        "message" => "บันทึกผล KPI เรียบร้อย!"
-    ]);
+        "message" => $message,
+        "data" => [
+            "case_id" => $case_id,
+            "result" => $result,
+            "reason" => $reason
+        ]
+    ], JSON_UNESCAPED_UNICODE);
 
-} catch(PDOException $e) {
+} catch (PDOException $e) {
+    http_response_code(500);
     echo json_encode([
         "success" => false,
-        "message" => "Error: " . $e->getMessage()
+        "message" => "เกิดข้อผิดพลาด: " . $e->getMessage()
     ]);
 }
 ?>

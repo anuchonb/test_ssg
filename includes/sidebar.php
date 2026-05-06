@@ -50,13 +50,14 @@ function url($page, $case_id = null)
     return 'javascript:void(0)';
 }
 
-/**
- * สร้าง alert onclick เมื่อไม่มี case_id
- */
-function noCaseAlert()
-{
+
+// ✅ ฟังก์ชั่นสร้าง alert เมื่อไม่มี case_id (SweetAlert2)
+function noCaseAlert() {
     global $current_case_id;
-    return !$current_case_id ? ' onclick="alert(\'กรุณาเปิดเคสจากหน้ารายการเคสก่อน\'); return false;"' : '';
+    if (!$current_case_id) {
+        return ' onclick="Swal.fire({icon:\'info\', title:\'กรุณาเลือกเคส\', text:\'คุณต้องเปิดเคสจากหน้ารายการเคสก่อน\', confirmButtonText:\'ไปหน้าเคสทั้งหมด\', confirmButtonColor:\'#3085d6\'}).then((result) => { if(result.isConfirmed) { window.location.href=\'cases.php\'; } }); return false;"';
+    }
+    return '';
 }
 
 function isActive($page)
@@ -75,7 +76,7 @@ function isActiveGroup($pages)
 <!-- ==================== SIDEBAR HTML ==================== -->
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <img src="../assets/img/logo.png" width="100" alt="Logo" class="sidebar-logo">
+        <img src="../assets/img/logo.png" width="100" alt="Logo" class="img-fluid sidebar-logo">
         <h4>CRM Condo System</h4>
         <small class="text-white-50">v1.0</small>
     </div>

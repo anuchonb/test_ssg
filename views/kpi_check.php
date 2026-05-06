@@ -1,7 +1,7 @@
 <?php
 // views/kpi_check.php
 session_start();
-if(!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user_id'])) {
     header("Location: ../index.php");
     exit();
 }
@@ -12,7 +12,7 @@ include_once '../includes/auth_check.php';
 include_once '../includes/functions.php';
 
 // ตรวจสอบ role
-if(!checkRole(['kpi', 'admin'])) {
+if (!checkRole(['kpi', 'admin'])) {
     header("Location: dashboard.php");
     exit();
 }
@@ -187,11 +187,11 @@ $user_role = $_SESSION['user_role'];
                                 <label class="form-label">Case ID <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text">#</span>
-                                    <input type="number" class="form-control" id="quickCaseId" 
-                                           placeholder="กรอก Case ID" required>
+                                    <input type="number" class="form-control" id="quickCaseId"
+                                        placeholder="กรอก Case ID" required>
                                 </div>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label class="form-label">ผลการตรวจ <span class="text-danger">*</span></label>
                                 <select class="form-select" id="quickResult" required>
@@ -200,20 +200,20 @@ $user_role = $_SESSION['user_role'];
                                     <option value="fail">❌ ไม่ผ่าน</option>
                                 </select>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label class="form-label">เหตุผล</label>
                                 <select class="form-select" id="quickReason">
                                     <option value="">เลือกเหตุผล</option>
                                 </select>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label class="form-label">หมายเหตุ</label>
-                                <textarea class="form-control" id="quickNote" rows="2" 
-                                          placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)"></textarea>
+                                <textarea class="form-control" id="quickNote" rows="2"
+                                    placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)"></textarea>
                             </div>
-                            
+
                             <button type="button" class="btn btn-primary w-100" onclick="submitQuickKpi()">
                                 <i class="fas fa-save"></i> บันทึกผล
                             </button>
@@ -319,7 +319,7 @@ $user_role = $_SESSION['user_role'];
                     <div class="card-body">
                         <form id="detailKpiForm">
                             <input type="hidden" id="detailCaseIdInput">
-                            
+
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label class="form-label">ผลการตรวจ <span class="text-danger">*</span></label>
@@ -336,11 +336,11 @@ $user_role = $_SESSION['user_role'];
                                     </select>
                                 </div>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label class="form-label">หมายเหตุ</label>
-                                <textarea class="form-control" id="detailNote" rows="3" 
-                                          placeholder="รายละเอียดเพิ่มเติม"></textarea>
+                                <textarea class="form-control" id="detailNote" rows="3"
+                                    placeholder="รายละเอียดเพิ่มเติม"></textarea>
                             </div>
                         </form>
                     </div>
@@ -357,405 +357,681 @@ $user_role = $_SESSION['user_role'];
 </div>
 
 <script>
-// ============ KPI CHECK JAVASCRIPT ============
+    // ============ KPI CHECK JAVASCRIPT ============
 
-$(document).ready(function() {
-    console.log('KPI Check page loaded');
-    
-    // โหลดข้อมูลเริ่มต้น
-    loadKpiStats();
-    loadPendingKpi();
-    loadRecentKpi();
-    loadKpiReasons();
-    loadMyStats();
-    
-    // Auto refresh ทุก 60 วินาที
-    setInterval(function() {
-        loadPendingKpi();
+    $(document).ready(function() {
+        //console.log('KPI Check page loaded');
+
+        // โหลดข้อมูลเริ่มต้น
         loadKpiStats();
-    }, 60000);
-});
+        loadPendingKpi();
+        loadRecentKpi();
+        loadKpiReasons();
+        loadMyStats();
 
-// ============ LOAD DATA ============
-function loadKpiReasons() {
-    $.ajax({
-        url: '../api/master/get.php',
-        type: 'GET',
-        data: { type: 'kpi_reason' },
-        dataType: 'json',
-        timeout: 10000,
-        success: function(data) {
-            console.log('KPI Reasons:', data);
-            
-            let options = '<option value="">เลือกเหตุผล</option>';
-            if(Array.isArray(data)) {
-                data.forEach(function(item) {
-                    options += '<option value="' + item.value + '">' + item.value + '</option>';
-                });
-            }
-            
-            $('#quickReason').html(options);
-            $('#detailReason').html(options);
-        },
-        error: function() {
-            console.error('Failed to load KPI reasons');
-            // Fallback options
-            const fallback = '<option value="">เลือกเหตุผล</option>' +
-                '<option value="ไม่ตาม">ไม่ตาม</option>' +
-                '<option value="ลูกค้าไม่ตอบ">ลูกค้าไม่ตอบ</option>' +
-                '<option value="ติดบูโร">ติดบูโร</option>' +
-                '<option value="อายุงานไม่ถึง">อายุงานไม่ถึง</option>' +
-                '<option value="รายได้ไม่ถึง">รายได้ไม่ถึง</option>' +
-                '<option value="เอกสารไม่ครบ">เอกสารไม่ครบ</option>' +
-                '<option value="เปลี่ยนใจ">เปลี่ยนใจ</option>' +
-                '<option value="อื่นๆ">อื่นๆ</option>';
-            
-            $('#quickReason').html(fallback);
-            $('#detailReason').html(fallback);
-        }
+        // Auto refresh ทุก 60 วินาที
+        setInterval(function() {
+            loadPendingKpi();
+            loadKpiStats();
+        }, 60000);
     });
-}
 
-function loadKpiStats() {
-    $.ajax({
-        url: '../api/kpi/stats.php',
-        type: 'GET',
-        dataType: 'json',
-        timeout: 10000,
-        success: function(response) {
-            console.log('KPI Stats:', response);
-            
-            if(response.success) {
-                $('#statTotal').text(response.total || 0);
-                $('#statPass').text(response.pass || 0);
-                $('#statFail').text(response.fail || 0);
-                $('#statPending').text(response.pending || 0);
-            } else {
-                console.error('Stats error:', response.message);
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('Stats API error:', status, error);
-        }
-    });
-}
+    // ============ LOAD DATA ============
+    function loadKpiReasons() {
+        $.ajax({
+            url: '../api/master/get.php',
+            type: 'GET',
+            data: {
+                type: 'kpi_reason'
+            },
+            dataType: 'json',
+            timeout: 10000,
+            success: function(data) {
+                //console.log('KPI Reasons:', data);
 
-function loadPendingKpi() {
-    $('#pendingKpiBody').html(
-        '<tr><td colspan="6" class="text-center py-4">' +
-        '<div class="spinner-border spinner-border-sm"></div> กำลังโหลด...</td></tr>'
-    );
-    
-    $.ajax({
-        url: '../api/kpi/pending.php',
-        type: 'GET',
-        dataType: 'json',
-        timeout: 10000,
-        success: function(response) {
-            console.log('Pending KPI:', response);
-            
-            if(response.success && response.data && response.data.length > 0) {
-                let html = '';
-                response.data.forEach(function(item) {
-                    html += '<tr>' +
-                        '<td><a href="case_detail.php?case_id=' + item.case_id + '" class="fw-bold">#' + item.case_id + '</a></td>' +
-                        '<td>' + (item.customer_name || '-') + '</td>' +
-                        '<td>' + (item.phone || '-') + '</td>' +
-                        '<td>' + (item.owner_name || '-') + '</td>' +
-                        '<td><small>' + formatDate(item.created_at) + '</small></td>' +
-                        '<td>' +
-                            '<button class="btn btn-sm btn-success" onclick="showKpiDetail(' + item.case_id + ')">' +
-                                '<i class="fas fa-check"></i> ตรวจ' +
-                            '</button>' +
-                        '</td>' +
-                    '</tr>';
-                });
-                $('#pendingKpiBody').html(html);
-            } else {
-                $('#pendingKpiBody').html(
-                    '<tr><td colspan="6" class="text-center py-4 text-success">' +
-                    '<i class="fas fa-check-circle fa-2x mb-2"></i>' +
-                    '<p>ไม่มีรายการรอตรวจ 🎉</p></td></tr>'
-                );
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('Pending KPI error:', status, error);
-            $('#pendingKpiBody').html(
-                '<tr><td colspan="6" class="text-center py-4 text-danger">' +
-                '<i class="fas fa-exclamation-triangle"></i> ไม่สามารถโหลดข้อมูลได้' +
-                '<br><button class="btn btn-sm btn-outline-primary mt-2" onclick="loadPendingKpi()">ลองใหม่</button>' +
-                '</td></tr>'
-            );
-        }
-    });
-}
-
-function loadRecentKpi() {
-    $('#recentKpiBody').html(
-        '<tr><td colspan="6" class="text-center py-4">' +
-        '<div class="spinner-border spinner-border-sm"></div> กำลังโหลด...</td></tr>'
-    );
-    
-    $.ajax({
-        url: '../api/kpi/history.php',
-        type: 'GET',
-        dataType: 'json',
-        timeout: 10000,
-        success: function(response) {
-            console.log('Recent KPI:', response);
-            
-            if(response.success && response.data && response.data.length > 0) {
-                let html = '';
-                response.data.forEach(function(item) {
-                    const resultBadge = item.result === 'pass' 
-                        ? '<span class="badge bg-success">ผ่าน</span>' 
-                        : '<span class="badge bg-danger">ไม่ผ่าน</span>';
-                    
-                    html += '<tr>' +
-                        '<td><small>' + formatDate(item.created_at) + '</small></td>' +
-                        '<td>#' + item.case_id + '</td>' +
-                        '<td>' + (item.customer_name || '-') + '</td>' +
-                        '<td>' + (item.checker_name || '-') + '</td>' +
-                        '<td>' + resultBadge + '</td>' +
-                        '<td>' + (item.reason || '-') + '</td>' +
-                    '</tr>';
-                });
-                $('#recentKpiBody').html(html);
-            } else {
-                $('#recentKpiBody').html(
-                    '<tr><td colspan="6" class="text-center py-4 text-muted">' +
-                    '<i class="fas fa-history"></i> ยังไม่มีประวัติการตรวจ</td></tr>'
-                );
-            }
-        },
-        error: function() {
-            $('#recentKpiBody').html(
-                '<tr><td colspan="6" class="text-center py-4 text-danger">' +
-                'ไม่สามารถโหลดประวัติได้</td></tr>'
-            );
-        }
-    });
-}
-
-function loadMyStats() {
-    $.ajax({
-        url: '../api/kpi/stats.php',
-        type: 'GET',
-        data: { user_id: <?php echo $user_id; ?> },
-        dataType: 'json',
-        timeout: 10000,
-        success: function(response) {
-            if(response.success) {
-                $('#myTotalChecks').text(response.today || 0);
-                $('#myAllChecks').text(response.total || 0);
-                
-                const rate = response.total > 0 
-                    ? Math.round((response.pass / response.total) * 100) 
-                    : 0;
-                $('#myPassRate').text(rate + '%');
-            }
-        }
-    });
-}
-
-// ============ SHOW KPI DETAIL MODAL ============
-function showKpiDetail(caseId) {
-    console.log('showKpiDetail:', caseId);
-    
-    $('#detailCaseId').text(caseId);
-    $('#detailCaseIdInput').val(caseId);
-    
-    // Reset form
-    $('#detailResult').val('');
-    $('#detailReason').val('');
-    $('#detailNote').val('');
-    
-    // Load case info
-    $.ajax({
-        url: '../api/cases/get.php',
-        type: 'GET',
-        data: { id: caseId },
-        dataType: 'json',
-        timeout: 10000,
-        success: function(response) {
-            if(response.success && response.data) {
-                const c = response.data;
-                $('#detailCustomerName').text(c.customer_name || '-');
-                $('#detailCustomerPhone').text(c.phone || '-');
-                $('#detailCustomerGrade').text(c.grade || '-');
-                $('#detailProject').text(c.project_name || '-');
-                $('#detailOwner').text(c.owner_name || '-');
-                $('#detailDate').text(formatDate(c.created_at));
-            }
-        }
-    });
-    
-    // Load follow history
-    $.ajax({
-        url: '../api/follow/list.php',
-        type: 'GET',
-        data: { case_id: caseId },
-        dataType: 'json',
-        timeout: 10000,
-        success: function(response) {
-            if(response.success && response.data && response.data.length > 0) {
-                let html = '<ul class="list-group list-group-flush">';
-                response.data.forEach(function(f) {
-                    html += '<li class="list-group-item py-2">' +
-                        '<strong>ครั้งที่ ' + f.step + ':</strong> ' + f.status +
-                        '<br><small class="text-muted">' + (f.note || 'ไม่มีบันทึก') + '</small>' +
-                        '<br><small class="text-muted">' + formatDate(f.created_at) + '</small>' +
-                    '</li>';
-                });
-                html += '</ul>';
-                $('#detailFollowHistory').html(html);
-            } else {
-                $('#detailFollowHistory').html('<p class="text-muted">ยังไม่มีการติดตาม</p>');
-            }
-        },
-        error: function() {
-            $('#detailFollowHistory').html('<p class="text-muted">ไม่สามารถโหลดประวัติได้</p>');
-        }
-    });
-    
-    $('#kpiDetailModal').modal('show');
-}
-
-// ============ SUBMIT KPI ============
-function submitQuickKpi() {
-    const caseId = $('#quickCaseId').val();
-    const result = $('#quickResult').val();
-    const reason = $('#quickReason').val();
-    const note = $('#quickNote').val();
-    
-    // Validate
-    if(!caseId) {
-        alert('กรุณากรอก Case ID');
-        $('#quickCaseId').focus();
-        return;
-    }
-    
-    if(!result) {
-        alert('กรุณาเลือกผลการตรวจ');
-        return;
-    }
-    
-    // Confirm
-    if(!confirm('ยืนยันการตรวจ KPI Case #' + caseId + '?\nผล: ' + (result === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน'))) {
-        return;
-    }
-    
-    doKpiCheck(caseId, result, reason, note, function() {
-        // Clear form on success
-        $('#quickCaseId').val('');
-        $('#quickResult').val('');
-        $('#quickReason').val('');
-        $('#quickNote').val('');
-    });
-}
-
-function submitDetailKpi() {
-    const caseId = $('#detailCaseIdInput').val();
-    const result = $('#detailResult').val();
-    const reason = $('#detailReason').val();
-    const note = $('#detailNote').val();
-    
-    // Validate
-    if(!result) {
-        alert('กรุณาเลือกผลการตรวจ');
-        return;
-    }
-    
-    // Confirm
-    if(!confirm('ยืนยันการตรวจ KPI Case #' + caseId + '?')) {
-        return;
-    }
-    
-    doKpiCheck(caseId, result, reason, note, function() {
-        $('#kpiDetailModal').modal('hide');
-    });
-}
-
-function doKpiCheck(caseId, result, reason, note, callback) {
-    // Prepare data
-    const postData = {
-        case_id: parseInt(caseId),
-        result: result,
-        reason: reason || '',
-        note: note || ''
-    };
-    
-    console.log('Sending KPI data:', JSON.stringify(postData));
-    
-    $.ajax({
-        url: '../api/kpi/check.php',
-        type: 'POST',
-        data: JSON.stringify(postData),
-        contentType: 'application/json; charset=utf-8',
-        dataType: 'json',
-        timeout: 10000,
-        success: function(response) {
-            console.log('KPI Check response:', response);
-            
-            if(response.success) {
-                alert('บันทึกผล KPI เรียบร้อย!');
-                loadKpiStats();
-                loadPendingKpi();
-                loadRecentKpi();
-                if(typeof callback === 'function') {
-                    callback();
+                let options = '<option value="">เลือกเหตุผล</option>';
+                if (Array.isArray(data)) {
+                    data.forEach(function(item) {
+                        options += '<option value="' + item.value + '">' + item.value + '</option>';
+                    });
                 }
-            } else {
-                alert('ผิดพลาด: ' + (response.message || 'ไม่สามารถบันทึกได้'));
+
+                $('#quickReason').html(options);
+                $('#detailReason').html(options);
+            },
+            error: function() {
+                //console.error('Failed to load KPI reasons');
+                // Fallback options
+                const fallback = '<option value="">เลือกเหตุผล</option>' +
+                    '<option value="ไม่ตาม">ไม่ตาม</option>' +
+                    '<option value="ลูกค้าไม่ตอบ">ลูกค้าไม่ตอบ</option>' +
+                    '<option value="ติดบูโร">ติดบูโร</option>' +
+                    '<option value="อายุงานไม่ถึง">อายุงานไม่ถึง</option>' +
+                    '<option value="รายได้ไม่ถึง">รายได้ไม่ถึง</option>' +
+                    '<option value="เอกสารไม่ครบ">เอกสารไม่ครบ</option>' +
+                    '<option value="เปลี่ยนใจ">เปลี่ยนใจ</option>' +
+                    '<option value="อื่นๆ">อื่นๆ</option>';
+
+                $('#quickReason').html(fallback);
+                $('#detailReason').html(fallback);
             }
-        },
-        error: function(xhr, status, error) {
-            console.error('KPI Check error:', status, error);
-            console.error('Response:', xhr.responseText);
-            
-            let msg = 'ไม่สามารถบันทึกได้';
-            try {
-                const resp = JSON.parse(xhr.responseText);
-                msg = resp.message || msg;
-            } catch(e) {
-                // ถ้า parse ไม่ได้ แสดง response text
-                msg = 'Server error: ' + xhr.status;
+        });
+    }
+
+    function loadKpiStats() {
+        $.ajax({
+            url: '../api/kpi/stats.php',
+            type: 'GET',
+            dataType: 'json',
+            timeout: 10000,
+            success: function(response) {
+                //console.log('KPI Stats:', response);
+
+                if (response.success) {
+                    $('#statTotal').text(response.total || 0);
+                    $('#statPass').text(response.pass || 0);
+                    $('#statFail').text(response.fail || 0);
+                    $('#statPending').text(response.pending || 0);
+                } else {
+                    //console.error('Stats error:', response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                //console.error('Stats API error:', status, error);
             }
-            
-            alert('ผิดพลาด: ' + msg);
+        });
+    }
+
+    function loadPendingKpi() {
+        $('#pendingKpiBody').html(
+            '<tr><td colspan="6" class="text-center py-4">' +
+            '<div class="spinner-border spinner-border-sm"></div> กำลังโหลด...</td></tr>'
+        );
+
+        $.ajax({
+            url: '../api/kpi/pending.php',
+            type: 'GET',
+            dataType: 'json',
+            timeout: 10000,
+            success: function(response) {
+                //console.log('Pending KPI:', response);
+
+                if (response.success && response.data && response.data.length > 0) {
+                    let html = '';
+                    response.data.forEach(function(item) {
+                        html += '<tr>' +
+                            '<td><a href="case_detail.php?case_id=' + item.case_id + '" class="fw-bold">#' + item.case_id + '</a></td>' +
+                            '<td>' + (item.customer_name || '-') + '</td>' +
+                            '<td>' + (item.phone || '-') + '</td>' +
+                            '<td>' + (item.owner_name || '-') + '</td>' +
+                            '<td><small>' + formatDate(item.created_at) + '</small></td>' +
+                            '<td>' +
+                            '<button class="btn btn-sm btn-success" onclick="showKpiDetail(' + item.case_id + ')">' +
+                            '<i class="fas fa-check"></i> ตรวจ' +
+                            '</button>' +
+                            '</td>' +
+                            '</tr>';
+                    });
+                    $('#pendingKpiBody').html(html);
+                } else {
+                    $('#pendingKpiBody').html(
+                        '<tr><td colspan="6" class="text-center py-4 text-success">' +
+                        '<i class="fas fa-check-circle fa-2x mb-2"></i>' +
+                        '<p>ไม่มีรายการรอตรวจ 🎉</p></td></tr>'
+                    );
+                }
+            },
+            error: function(xhr, status, error) {
+                //console.error('Pending KPI error:', status, error);
+                $('#pendingKpiBody').html(
+                    '<tr><td colspan="6" class="text-center py-4 text-danger">' +
+                    '<i class="fas fa-exclamation-triangle"></i> ไม่สามารถโหลดข้อมูลได้' +
+                    '<br><button class="btn btn-sm btn-outline-primary mt-2" onclick="loadPendingKpi()">ลองใหม่</button>' +
+                    '</td></tr>'
+                );
+            }
+        });
+    }
+
+    function loadRecentKpi() {
+        $('#recentKpiBody').html(
+            '<tr><td colspan="6" class="text-center py-4">' +
+            '<div class="spinner-border spinner-border-sm"></div> กำลังโหลด...</td></tr>'
+        );
+
+        $.ajax({
+            url: '../api/kpi/history.php',
+            type: 'GET',
+            dataType: 'json',
+            timeout: 10000,
+            success: function(response) {
+                //console.log('Recent KPI:', response);
+
+                if (response.success && response.data && response.data.length > 0) {
+                    let html = '';
+                    response.data.forEach(function(item) {
+                        const resultBadge = item.result === 'pass' ?
+                            '<span class="badge bg-success">ผ่าน</span>' :
+                            '<span class="badge bg-danger">ไม่ผ่าน</span>';
+
+                        html += '<tr>' +
+                            '<td><small>' + formatDate(item.created_at) + '</small></td>' +
+                            '<td>#' + item.case_id + '</td>' +
+                            '<td>' + (item.customer_name || '-') + '</td>' +
+                            '<td>' + (item.checker_name || '-') + '</td>' +
+                            '<td>' + resultBadge + '</td>' +
+                            '<td>' + (item.reason || '-') + '</td>' +
+                            '</tr>';
+                    });
+                    $('#recentKpiBody').html(html);
+                } else {
+                    $('#recentKpiBody').html(
+                        '<tr><td colspan="6" class="text-center py-4 text-muted">' +
+                        '<i class="fas fa-history"></i> ยังไม่มีประวัติการตรวจ</td></tr>'
+                    );
+                }
+            },
+            error: function() {
+                $('#recentKpiBody').html(
+                    '<tr><td colspan="6" class="text-center py-4 text-danger">' +
+                    'ไม่สามารถโหลดประวัติได้</td></tr>'
+                );
+            }
+        });
+    }
+
+    function loadMyStats() {
+        $.ajax({
+            url: '../api/kpi/stats.php',
+            type: 'GET',
+            data: {
+                user_id: <?php echo $user_id; ?>
+            },
+            dataType: 'json',
+            timeout: 10000,
+            success: function(response) {
+                if (response.success) {
+                    $('#myTotalChecks').text(response.today || 0);
+                    $('#myAllChecks').text(response.total || 0);
+
+                    const rate = response.total > 0 ?
+                        Math.round((response.pass / response.total) * 100) :
+                        0;
+                    $('#myPassRate').text(rate + '%');
+                }
+            }
+        });
+    }
+
+    // ✅ แสดง Modal ตรวจ KPI พร้อมข้อมูลครบ
+    function showKpiDetail(caseId) {
+        console.log('showKpiDetail:', caseId);
+
+        $('#detailCaseId').text(caseId);
+        $('#detailCaseIdInput').val(caseId);
+
+        // Reset form
+        $('#detailResult').val('');
+        $('#detailReason').val('');
+        $('#detailNote').val('');
+
+        // ✅ โหลดข้อมูลเคส (รวมข้อมูลลูกค้า)
+        $.ajax({
+            url: '../api/cases/get.php',
+            type: 'GET',
+            data: {
+                id: caseId
+            },
+            dataType: 'json',
+            timeout: 10000,
+            success: function(response) {
+                if (response.success && response.data) {
+                    const c = response.data;
+                    $('#detailCustomerName').text(c.customer_name || '-');
+                    $('#detailCustomerPhone').text(c.phone || '-');
+                    $('#detailCustomerGrade').text(c.grade || '-');
+                    $('#detailProject').text(c.project_name || '-');
+                    $('#detailOwner').text(c.owner_name || '-');
+                    $('#detailDate').text(formatDate(c.created_at));
+                }
+            }
+        });
+
+        // ✅ โหลดประวัติการติดตาม
+        $.ajax({
+            url: '../api/follow/list.php',
+            type: 'GET',
+            data: {
+                case_id: caseId
+            },
+            dataType: 'json',
+            timeout: 10000,
+            success: function(response) {
+                if (response.success && response.data && response.data.length > 0) {
+                    let html = '<ul class="list-group list-group-flush">';
+
+                    response.data.forEach(function(f) {
+                        // ✅ แปลงสถานะเป็นภาษาไทย
+                        let statusLabel = getFollowStatusLabel(f.status);
+
+                        html +=
+                            '<li class="list-group-item py-2">' +
+                            '<div class="d-flex justify-content-between">' +
+                            '<strong>ครั้งที่ ' + f.step + ':</strong>' +
+                            '<small class="text-muted">' + formatDate(f.created_at) + '</small>' +
+                            '</div>' +
+                            '<div>' + statusLabel + '</div>' +
+                            (f.note ? '<small class="text-muted">📝 ' + f.note + '</small>' : '') +
+                            '</li>';
+                    });
+
+                    html += '</ul>';
+                    $('#detailFollowHistory').html(html);
+                } else {
+                    $('#detailFollowHistory').html(
+                        '<div class="text-center py-3 text-muted">' +
+                        '<i class="fas fa-phone-slash fa-2x mb-2"></i>' +
+                        '<p>ยังไม่มีการติดตาม</p>' +
+                        '</div>'
+                    );
+                }
+            },
+            error: function() {
+                $('#detailFollowHistory').html('<p class="text-muted">ไม่สามารถโหลดประวัติการติดตามได้</p>');
+            }
+        });
+
+        // ✅ แสดง Modal
+        $('#kpiDetailModal').modal('show');
+    }
+
+    // ✅ Helper: แปลงสถานะติดตามเป็นภาษาไทย
+    function getFollowStatusLabel(status) {
+        const labels = {
+            'interested': '✅ สนใจ',
+            'high_interest': '🌟 สนใจมาก',
+            'pending': '⏳ รอดำเนินการ',
+            'negotiating': '💬 กำลังต่อรอง',
+            'site_visit': '🏢 นัดดูห้อง',
+            'document_submitted': '📄 ส่งเอกสารแล้ว',
+            'waiting_approval': '🏦 รออนุมัติ',
+            'not_interested': '❌ ไม่สนใจ',
+            'cancelled': '🚫 ยกเลิก'
+        };
+        return labels[status] || status;
+    }
+
+    // ✅ ตรวจ KPI แบบเร็ว (SweetAlert2)
+    function submitQuickKpi() {
+        const caseId = $('#quickCaseId').val();
+        const result = $('#quickResult').val();
+        const reason = $('#quickReason').val();
+        const note = $('#quickNote').val();
+
+        // ❌ Validate
+        if (!caseId) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'กรุณากรอก Case ID',
+                toast: true,
+                position: 'top-end',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            $('#quickCaseId').focus();
+            return;
+        }
+
+        if (!result) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'กรุณาเลือกผลการตรวจ',
+                toast: true,
+                position: 'top-end',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            return;
+        }
+
+        // ✅ Confirm
+        let resultLabel = result === 'pass' ? '✅ ผ่าน' : '❌ ไม่ผ่าน';
+        let reasonLabel = reason || 'ไม่ระบุ';
+
+        Swal.fire({
+            title: 'ยืนยันการตรวจ KPI?',
+            html: `
+            <div class="text-start">
+                <p>📋 <strong>Case ID:</strong> #${caseId}</p>
+                <p>📊 <strong>ผล:</strong> ${resultLabel}</p>
+                <p>📝 <strong>เหตุผล:</strong> ${reasonLabel}</p>
+                ${note ? '<p>💬 <strong>หมายเหตุ:</strong> ' + note + '</p>' : ''}
+            </div>
+        `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-check"></i> บันทึก',
+            cancelButtonText: 'ยกเลิก'
+        }).then((resultSwal) => {
+            if (resultSwal.isConfirmed) {
+                // Loading
+                Swal.fire({
+                    title: 'กำลังบันทึก...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                const postData = {
+                    case_id: parseInt(caseId),
+                    result: result,
+                    reason: reason || '',
+                    note: note || ''
+                };
+
+                $.ajax({
+                    url: '../api/kpi/check.php',
+                    type: 'POST',
+                    data: JSON.stringify(postData),
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    timeout: 10000,
+                    success: function(res) {
+                        if (res.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'บันทึกสำเร็จ!',
+                                text: 'บันทึกผล KPI เรียบร้อยแล้ว ✅',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                            // ล้างฟอร์ม
+                            $('#quickCaseId').val('');
+                            $('#quickResult').val('');
+                            $('#quickReason').val('');
+                            $('#quickNote').val('');
+                            // โหลดข้อมูลใหม่
+                            loadKpiStats();
+                            loadPendingKpi();
+                            loadRecentKpi();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'ผิดพลาด',
+                                text: res.message || 'ไม่สามารถบันทึกได้'
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'ผิดพลาด',
+                            text: 'ไม่สามารถบันทึกได้ (Status: ' + xhr.status + ')'
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    // ✅ ตรวจ KPI จาก Modal (SweetAlert2)
+    function submitDetailKpi() {
+        const caseId = $('#detailCaseIdInput').val();
+        const result = $('#detailResult').val();
+        const reason = $('#detailReason').val();
+        const note = $('#detailNote').val();
+
+        // ❌ Validate
+        if (!result) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'กรุณาเลือกผลการตรวจ',
+                toast: true,
+                position: 'top-end',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            return;
+        }
+
+        // ✅ Confirm
+        let resultLabel = result === 'pass' ? '✅ ผ่าน' : '❌ ไม่ผ่าน';
+
+        Swal.fire({
+            title: 'ยืนยันการตรวจ KPI?',
+            html: `
+            <div class="text-start">
+                <p>📋 <strong>Case ID:</strong> #${caseId}</p>
+                <p>📊 <strong>ผล:</strong> ${resultLabel}</p>
+                <p>📝 <strong>เหตุผล:</strong> ${reason || 'ไม่ระบุ'}</p>
+                ${note ? '<p>💬 <strong>หมายเหตุ:</strong> ' + note + '</p>' : ''}
+            </div>
+        `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-check"></i> บันทึก',
+            cancelButtonText: 'ยกเลิก'
+        }).then((resultSwal) => {
+            if (resultSwal.isConfirmed) {
+                // Loading
+                Swal.fire({
+                    title: 'กำลังบันทึก...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                const postData = {
+                    case_id: parseInt(caseId),
+                    checker_id: <?php echo isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0; ?>,
+                    result: result,
+                    reason: reason || '',
+                    note: note || ''
+                };
+
+                $.ajax({
+                    url: '../api/kpi/check.php',
+                    type: 'POST',
+                    data: JSON.stringify(postData),
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    timeout: 10000,
+                    success: function(res) {
+                        if (res.success) {
+                            $('#kpiDetailModal').modal('hide');
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'บันทึกสำเร็จ!',
+                                text: 'บันทึกผล KPI เรียบร้อยแล้ว ✅',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                            loadKpiStats();
+                            loadPendingKpi();
+                            loadRecentKpi();
+                            loadMyStats();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'ผิดพลาด',
+                                text: res.message || 'ไม่สามารถบันทึกได้'
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'ผิดพลาด',
+                            text: 'ไม่สามารถบันทึกได้ (Status: ' + xhr.status + ')'
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    // ✅ ตรวจ KPI (SweetAlert2) - ฟังก์ชั่นกลาง
+    function doKpiCheck(caseId, result, reason, note, callback) {
+        // ❌ Validate
+        if (!caseId) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'กรุณากรอก Case ID',
+                toast: true,
+                position: 'top-end',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            return;
+        }
+
+        if (!result) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'กรุณาเลือกผลการตรวจ',
+                toast: true,
+                position: 'top-end',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            return;
+        }
+
+        // ✅ Confirm
+        let resultLabel = result === 'pass' ? '✅ ผ่าน' : '❌ ไม่ผ่าน';
+
+        Swal.fire({
+            title: 'ยืนยันการตรวจ KPI?',
+            html: `
+            <div class="text-start">
+                <p>📋 <strong>Case ID:</strong> #${caseId}</p>
+                <p>📊 <strong>ผล:</strong> ${resultLabel}</p>
+                <p>📝 <strong>เหตุผล:</strong> ${reason || 'ไม่ระบุ'}</p>
+                ${note ? '<p>💬 <strong>หมายเหตุ:</strong> ' + note + '</p>' : ''}
+            </div>
+        `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-check"></i> บันทึก',
+            cancelButtonText: 'ยกเลิก'
+        }).then((resultSwal) => {
+            if (resultSwal.isConfirmed) {
+                // Loading
+                Swal.fire({
+                    title: 'กำลังบันทึก...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Disable button (ถ้ามี)
+                let btn = $(document.activeElement);
+                let origText = btn.html();
+                if (btn.is('button')) {
+                    btn.html('<span class="spinner-border spinner-border-sm"></span> กำลังบันทึก...').prop('disabled', true);
+                }
+
+                const postData = {
+                    case_id: parseInt(caseId),
+                    checker_id: <?php echo isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0; ?>,
+                    result: result,
+                    reason: reason || '',
+                    note: note || ''
+                };
+
+                $.ajax({
+                    url: '../api/kpi/check.php',
+                    type: 'POST',
+                    data: JSON.stringify(postData),
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    timeout: 10000,
+                    success: function(res) {
+                        // Restore button
+                        if (btn.is('button')) {
+                            btn.html(origText).prop('disabled', false);
+                        }
+
+                        if (res.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'บันทึกสำเร็จ!',
+                                text: 'บันทึกผล KPI เรียบร้อยแล้ว ✅',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+
+                            // Reload data
+                            loadKpiStats();
+                            loadPendingKpi();
+                            loadRecentKpi();
+                            loadMyStats();
+
+                            // Execute callback (ถ้ามี)
+                            if (typeof callback === 'function') {
+                                callback();
+                            }
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'ผิดพลาด',
+                                text: res.message || 'ไม่สามารถบันทึกได้'
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        if (btn.is('button')) {
+                            btn.html(origText).prop('disabled', false);
+                        }
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'ผิดพลาด',
+                            text: 'ไม่สามารถบันทึกได้ (Status: ' + xhr.status + ')'
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    // ============ HELPERS ============
+    function formatDate(dateString) {
+        if (!dateString) return '-';
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return dateString;
+            return date.toLocaleDateString('th-TH', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (e) {
+            return dateString;
+        }
+    }
+
+    // ============ KEYBOARD SHORTCUTS ============
+    $(document).keydown(function(e) {
+        // Ctrl+Enter to submit quick KPI
+        if (e.ctrlKey && e.key === 'Enter') {
+            if ($('#quickCaseId').is(':focus')) {
+                e.preventDefault();
+                submitQuickKpi();
+            }
         }
     });
-}
-
-// ============ HELPERS ============
-function formatDate(dateString) {
-    if(!dateString) return '-';
-    try {
-        const date = new Date(dateString);
-        if(isNaN(date.getTime())) return dateString;
-        return date.toLocaleDateString('th-TH', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    } catch(e) {
-        return dateString;
-    }
-}
-
-// ============ KEYBOARD SHORTCUTS ============
-$(document).keydown(function(e) {
-    // Ctrl+Enter to submit quick KPI
-    if(e.ctrlKey && e.key === 'Enter') {
-        if($('#quickCaseId').is(':focus')) {
-            e.preventDefault();
-            submitQuickKpi();
-        }
-    }
-});
 </script>
 
 <?php include_once '../includes/footer.php'; ?>
