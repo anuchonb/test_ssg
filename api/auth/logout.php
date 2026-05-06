@@ -36,7 +36,7 @@ if(isset($_SESSION['user_id'])) {
         
     } catch(PDOException $e) {
         // ถ้าเชื่อมต่อฐานข้อมูลไม่ได้ ก็ยังคง logout ได้
-        error_log("Logout log error: " . $e->getMessage());
+        //error_log("Logout log error: " . $e->getMessage());
     }
     
     // ลบ session variables ทั้งหมด

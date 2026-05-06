@@ -44,7 +44,9 @@ if(!empty($data->id) && !empty($data->name) && !empty($data->email)) {
             email = :email";
         
         // ถ้ามีการเปลี่ยนรหัสผ่าน
+        $hashed_password = null;
         if(!empty($data->password)) {
+            $hashed_password = password_hash($data->password, PASSWORD_DEFAULT);
             $query .= ", password = :password";
         }
         
@@ -61,7 +63,7 @@ if(!empty($data->id) && !empty($data->name) && !empty($data->email)) {
         $stmt->bindParam(":id", $data->id);
         
         if(!empty($data->password)) {
-            $stmt->bindParam(":password", $data->password);
+            $stmt->bindParam(":password", $hashed_password);
         }
         
         if($_SESSION['user_role'] === 'admin' && !empty($data->role)) {

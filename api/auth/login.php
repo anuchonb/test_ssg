@@ -19,11 +19,7 @@ $data = json_decode(file_get_contents("php://input"));
 if(!empty($data->email) && !empty($data->password)) {
     try {
         // ค้นหาผู้ใช้จาก email
-        $query = "SELECT id, name, email, password, role, created_at 
-                  FROM users 
-                  WHERE email = :email 
-                  LIMIT 1";
-        
+        $query = "SELECT id, name, email, password, role, created_at FROM users WHERE email = :email  LIMIT 1";
         $stmt = $db->prepare($query);
         $stmt->bindParam(":email", $data->email);
         $stmt->execute();
@@ -32,8 +28,11 @@ if(!empty($data->email) && !empty($data->password)) {
             $user = $stmt->fetch();
             
             // ในระบบจริงควรใช้ password_verify()
-            // สำหรับตัวอย่างนี้ใช้การเปรียบเทียบตรงๆ (ควรเปลี่ยนเป็น hash ใน production)
-            if($data->password === $user['password']) {
+            unset($user['password']); // ลบข้อมูลรหัสผ่านออกจากตัวแปรผู้ใช้เพื่อความปลอดภัย
+            
+            $password_hash = password_hash($data->password, PASSWORD_DEFAULT);
+            
+            if(password_verify($data->password, $user['password'])) {
                 
                 // เก็บข้อมูลลง Session
                 $_SESSION['user_id'] = $user['id'];

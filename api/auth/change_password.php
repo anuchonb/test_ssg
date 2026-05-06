@@ -33,7 +33,7 @@ if(!empty($data->current_password) && !empty($data->new_password)) {
         
         $user = $stmt->fetch();
         
-        if($data->current_password !== $user['password']) {
+        if(!password_verify($data->current_password, $user['password'])) {
             http_response_code(400);
             echo json_encode(array(
                 "success" => false,
@@ -43,9 +43,11 @@ if(!empty($data->current_password) && !empty($data->new_password)) {
         }
         
         // เปลี่ยนรหัสผ่าน
+        $hashed_new_password = password_hash($data->new_password, PASSWORD_DEFAULT);
+        
         $update_query = "UPDATE users SET password = :password WHERE id = :id";
         $update_stmt = $db->prepare($update_query);
-        $update_stmt->bindParam(":password", $data->new_password);
+        $update_stmt->bindParam(":password", $hashed_new_password);
         $update_stmt->bindParam(":id", $_SESSION['user_id']);
         $update_stmt->execute();
         

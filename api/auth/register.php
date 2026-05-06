@@ -59,11 +59,12 @@ if(!empty($data->name) && !empty($data->email) && !empty($data->password) && !em
             email = :email,
             password = :password,
             role = :role";
+        $hashed_password = password_hash($data->password, PASSWORD_DEFAULT); // ควรใช้ hash ใน production
         
         $stmt = $db->prepare($query);
         $stmt->bindParam(":name", $data->name);
         $stmt->bindParam(":email", $data->email);
-        $stmt->bindParam(":password", $data->password); // ใน production ใช้ $hashed_password
+        $stmt->bindParam(":password", $hashed_password); // ใน production ใช้ $hashed_password
         $stmt->bindParam(":role", $data->role);
         
         if($stmt->execute()) {

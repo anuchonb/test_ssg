@@ -682,9 +682,9 @@ function editUser(id) {
     });
 }
 
+// ✅ บันทึกผู้ใช้ (SweetAlert2)
 function saveUser() {
-    //console.log('saveUser() called');
-    
+    // Validate
     const name = $('#user_name').val().trim();
     const email = $('#user_email').val().trim();
     const role = $('#user_role').val();
@@ -692,75 +692,129 @@ function saveUser() {
     const confirmPassword = $('#user_confirm_password').val();
     const isEdit = currentUserId ? true : false;
     
-    // Validate
-    if(!name) {
-        alert('กรุณากรอกชื่อ-นามสกุล');
-        return;
-    }
-    if(!email) {
-        alert('กรุณากรอกอีเมล');
-        return;
-    }
-    if(!role) {
-        alert('กรุณาเลือก Role');
-        return;
-    }
-    if(!isEdit && !password) {
-        alert('กรุณากรอกรหัสผ่าน');
-        return;
-    }
-    if(password && password !== confirmPassword) {
-        alert('รหัสผ่านไม่ตรงกัน');
+    // Required fields
+    if (!name) {
+        Swal.fire({ icon: 'warning', title: 'กรุณากรอกชื่อ-นามสกุล', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+        $('#user_name').focus();
         return;
     }
     
-    // Confirm
-    if(!confirm(isEdit ? 'ยืนยันการแก้ไข?' : 'ยืนยันการเพิ่มผู้ใช้ใหม่?')) {
+    if (!email) {
+        Swal.fire({ icon: 'warning', title: 'กรุณากรอกอีเมล', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+        $('#user_email').focus();
         return;
     }
     
-    const postData = {
-        name: name,
-        email: email,
-        role: role
-    };
-    
-    if(password) {
-        postData.password = password;
+    if (!role) {
+        Swal.fire({ icon: 'warning', title: 'กรุณาเลือก Role', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+        return;
     }
     
-    if(isEdit) {
-        postData.id = currentUserId;
+    // Password validation
+    if (!isEdit) {
+        if (!password) {
+            Swal.fire({ icon: 'warning', title: 'กรุณากรอกรหัสผ่าน', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+            $('#user_password').focus();
+            return;
+        }
+        if (password.length < 4) {
+            Swal.fire({ icon: 'warning', title: 'รหัสผ่านต้องอย่างน้อย 4 ตัวอักษร', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+            return;
+        }
+        if (password !== confirmPassword) {
+            Swal.fire({ icon: 'warning', title: 'รหัสผ่านไม่ตรงกัน', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+            return;
+        }
+    } else if (password) {
+        if (password.length < 4) {
+            Swal.fire({ icon: 'warning', title: 'รหัสผ่านต้องอย่างน้อย 4 ตัวอักษร', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+            return;
+        }
+        if (password !== confirmPassword) {
+            Swal.fire({ icon: 'warning', title: 'รหัสผ่านไม่ตรงกัน', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+            return;
+        }
     }
     
-    const url = isEdit ? '../api/users/update.php' : '../api/users/create.php';
+    // Email format
+    if (!isValidEmail(email)) {
+        Swal.fire({ icon: 'warning', title: 'รูปแบบอีเมลไม่ถูกต้อง', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+        return;
+    }
     
-    //console.log('Saving to:', url, postData);
-    
-    $.ajax({
-        url: url,
-        type: 'POST',
-        data: JSON.stringify(postData),
-        contentType: 'application/json',
-        dataType: 'json',
-        timeout: 10000,
-        success: function(response) {
-            //console.log('Save response:', response);
+    // ✅ ยืนยันการบันทึก
+    Swal.fire({
+        title: isEdit ? 'ยืนยันการแก้ไขผู้ใช้?' : 'ยืนยันการเพิ่มผู้ใช้ใหม่?',
+        html: `
+            <div class="text-start">
+                <p><strong>ชื่อ:</strong> ${name}</p>
+                <p><strong>อีเมล:</strong> ${email}</p>
+                <p><strong>Role:</strong> ${getRoleLabel(role)}</p>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="fas fa-save"></i> บันทึก',
+        cancelButtonText: 'ยกเลิก'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Loading
+            Swal.fire({
+                title: 'กำลังบันทึก...',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
             
-            if(response.success) {
-                $('#userModal').modal('hide');
-                alert('บันทึกสำเร็จ!');
-                loadUsers();
-                loadUserStats();
-            } else {
-                alert('ผิดพลาด: ' + (response.message || 'ไม่สามารถบันทึกได้'));
-            }
-        },
-        error: function(xhr, status, error) {
-            //console.error('Save error:', status, error);
-            alert('ไม่สามารถบันทึกได้: ' + status);
+            const url = isEdit ? '../api/users/update.php' : '../api/users/create.php';
+            
+            const data = { name, email, role };
+            if (password) data.password = password;
+            if (isEdit) data.id = currentUserId;
+            
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                dataType: 'json',
+                timeout: 10000,
+                success: function(res) {
+                    if (res.success) {
+                        $('#userModal').modal('hide');
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'บันทึกสำเร็จ!',
+                            text: res.message || '',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        loadUsers();
+                        loadUserStats();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'ผิดพลาด',
+                            text: res.message || 'ไม่สามารถบันทึกได้'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'ผิดพลาด',
+                        text: 'ไม่สามารถบันทึกได้ (Status: ' + xhr.status + ')'
+                    });
+                }
+            });
         }
     });
+}
+
+// ✅ ฟังก์ชั่นช่วย
+function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function confirmDeleteUser(id, name, caseCount) {

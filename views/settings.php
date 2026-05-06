@@ -462,29 +462,8 @@ if (!checkRole('admin')) {
 
     $(document).ready(function() {
         loadAllSettings();
+        loadBackupHistory();
 
-        // ✅ วิธีที่ 1: ใช้ Bootstrap Tab Event
-        $('#settingsMenu a[data-bs-toggle="list"]').on('shown.bs.tab', function(e) {
-            let target = $(e.target).attr('href'); // #tab-backup
-            
-            if (target === '#tab-backup') {
-                // console.log('Backup tab shown, loading history...');
-                loadBackupHistory();
-            }
-        });
-        
-        $(document).on('click', 'a[data-bs-toggle="list"]', function() {
-            let target = $(this).attr('href');
-            if (target === '#tab-backup') {
-                setTimeout(function() {
-                    loadBackupHistory();
-                }, 200);
-            }
-        });
-        
-        if (window.location.hash === '#tab-backup') {
-            setTimeout(loadBackupHistory, 500);
-        }
         // Activate first menu item
         $('#settingsMenu a:first-child').addClass('active');
 
@@ -533,7 +512,7 @@ if (!checkRole('admin')) {
                 $('#line_transfer').prop('checked', s.line_transfer == '1');
                 $('#line_daily_report').prop('checked', s.line_daily_report == '1');
 
-                console.log('Settings loaded');
+                // console.log('Settings loaded');
             }
         }, 'json');
     }
