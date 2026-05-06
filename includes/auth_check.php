@@ -41,7 +41,6 @@ function checkAuth() {
             ]);
             exit();
         }
-        
         header("Location: ../index.php?timeout=1");
         exit();
     }

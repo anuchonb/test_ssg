@@ -50,16 +50,46 @@ if (!$case_id) {
 
         <!-- Tabs Navigation -->
         <ul class="nav nav-tabs mb-3" id="caseTabs" role="tablist">
-            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-customer">👤 ข้อมูลลูกค้า</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-follow">📞 ติดตาม</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-kpi">✅ KPI</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-preapprove">📋 Pre-Approve</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-documents">📄 เอกสาร</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-bank">🏦 ส่งธนาคาร</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-approval">💰 อนุมัติ</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-debt">💳 ปิดหนี้</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-mortgage">🏠 จำนอง</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-inspection">🔍 ตรวจห้อง</button></li>
+            
+            <?php if (in_array($_SESSION['user_role'], ['admin_page', 'admin'])): ?>
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-customer">👤 ข้อมูลลูกค้า</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-follow">📞 ติดตาม</button>
+                </li>
+            <?php endif; ?>
+            
+            <?php if (in_array($_SESSION['user_role'], ['kpi', 'admin'])): ?>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-kpi">✅ KPI</button>
+                </li>
+            <?php endif; ?>
+            
+            <?php if (in_array($_SESSION['user_role'], ['support', 'admin'])): ?>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-preapprove">📋 Pre-Approve</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-documents">📄 เอกสาร</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-bank">🏦 ส่งธนาคาร</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-approval">💰 อนุมัติ</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-debt">💳 ปิดหนี้</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-mortgage">🏠 จำนอง</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-inspection">🔍 ตรวจห้อง</button>
+                </li>
+            <?php endif; ?>
+            
         </ul>
 
         <!-- Tabs Content -->

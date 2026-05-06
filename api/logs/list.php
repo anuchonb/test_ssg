@@ -77,20 +77,16 @@ try {
     $offset = ($page - 1) * $per_page;
     
     // Get data
+    // ✅ ใส่ LIMIT ใน SQL โดยตรง
     $query = "SELECT ca.*, u.name as user_name, u.role as user_role
-              FROM case_activities ca 
-              LEFT JOIN users u ON ca.user_id = u.id 
-              {$whereClause}
-              ORDER BY ca.created_at DESC 
-              LIMIT :offset, :per_page";
-    
+            FROM case_activities ca 
+            LEFT JOIN users u ON ca.user_id = u.id 
+            {$whereClause}
+            ORDER BY ca.created_at DESC 
+            LIMIT {$offset}, {$per_page}"; // ← ใส่ใน SQL โดยตรง
+
     $stmt = $db->prepare($query);
-    foreach($params as $key => $value) {
-        $stmt->bindValue($key, $value);
-    }
-    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-    $stmt->bindValue(':per_page', $per_page, PDO::PARAM_INT);
-    $stmt->execute();
+    $stmt->execute($params); // ← ใช้ params เดิม ไม่ต้องเพิ่ม LIMIT
     
     $data = $stmt->fetchAll();
     

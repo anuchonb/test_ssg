@@ -142,7 +142,7 @@ function renderTableView(cases) {
         html += `
             <tr>
                 <td>
-                    <a href="case_detail.php?id=${c.id}" class="fw-bold text-decoration-none">
+                    <a href="case_detail.php?case_id=${c.id}" class="fw-bold text-decoration-none">
                         #${c.id}
                     </a>
                 </td>
@@ -174,7 +174,7 @@ function renderTableView(cases) {
                 </td>
                 <td>
                     <div class="btn-group btn-group-sm">
-                        <a href="case_detail.php?id=${c.id}" class="btn btn-info" title="ดูรายละเอียด">
+                        <a href="case_detail.php?case_id=${c.id}" class="btn btn-info" title="ดูรายละเอียด">
                             <i class="fas fa-eye"></i>
                         </a>
                         <button class="btn btn-warning" onclick="changeStatus(${c.id}, '${c.status}')" title="เปลี่ยนสถานะ">
@@ -213,7 +213,7 @@ function renderCardView(cases) {
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <h6 class="mb-0">
-                                <a href="case_detail.php?id=${c.id}" class="text-decoration-none">
+                                <a href="case_detail.php?case_id=${c.id}" class="text-decoration-none">
                                     #${c.id}
                                 </a>
                             </h6>
@@ -237,7 +237,7 @@ function renderCardView(cases) {
                         <div class="mt-2 d-flex justify-content-between">
                             <small>ตาม ${c.follow_count} ครั้ง</small>
                             <div class="btn-group btn-group-sm">
-                                <a href="case_detail.php?id=${c.id}" class="btn btn-info btn-sm">
+                                <a href="case_detail.php?case_id=${c.id}" class="btn btn-info btn-sm">
                                     <i class="fas fa-eye"></i>
                                 </a>
                             </div>

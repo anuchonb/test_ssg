@@ -380,7 +380,7 @@ function loadRecentCases() {
                     html += `
                         <tr>
                             <td>
-                                <a href="case_detail.php?id=${c.id}" class="text-decoration-none fw-bold">
+                                <a href="case_detail.php?case_id=${c.id}" class="text-decoration-none fw-bold">
                                     #${c.id}
                                 </a>
                             </td>

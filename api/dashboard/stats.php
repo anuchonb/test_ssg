@@ -14,9 +14,10 @@ try {
     $whereClause = "";
     $params = [];
     
-    if(isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin_page') {
-        $whereClause = "WHERE owner_id = :user_id";
-        $params[':user_id'] = $_SESSION['user_id'];
+    // แสดงสถิติเฉพาะของตัวเอง (ยกเว้น admin)
+    if (isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin_page', 'kpi', 'support'])) {
+        $whereClause = "WHERE cs.owner_id = ?";
+        $params = [$_SESSION['user_id']];
     }
     
     // สถิติหลัก

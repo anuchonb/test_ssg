@@ -584,30 +584,57 @@ function backupDatabase() {
 
 function restoreDatabase() {
     const fileInput = $('#restoreFile')[0];
-    if(!fileInput.files[0]) {
-        Swal.fire('กรุณาเลือกไฟล์', '', 'warning');
+    if (!fileInput.files[0]) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'กรุณาเลือกไฟล์',
+            text: 'เลือกไฟล์ .sql ที่ได้จากการสำรองข้อมูล'
+        });
+        return;
+    }
+    
+    const file = fileInput.files[0];
+    
+    // ตรวจสอบนามสกุล
+    if (!file.name.endsWith('.sql')) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'ไฟล์ไม่ถูกต้อง',
+            text: 'กรุณาเลือกไฟล์ .sql เท่านั้น'
+        });
         return;
     }
     
     Swal.fire({
-        title: 'ยืนยันการกู้คืนข้อมูล?',
-        text: 'ข้อมูลปัจจุบันจะถูกแทนที่ด้วยข้อมูลจากไฟล์สำรอง!',
+        title: '⚠️ ยืนยันการกู้คืนข้อมูล?',
+        html: `
+            <div class="text-start">
+                <p class="text-danger"><strong>คำเตือน:</strong></p>
+                <ul>
+                    <li>ข้อมูลปัจจุบันจะถูกแทนที่ด้วยข้อมูลจากไฟล์สำรอง</li>
+                    <li>การกระทำนี้ไม่สามารถยกเลิกได้</li>
+                    <li>ระบบจะสำรองข้อมูลปัจจุบันก่อนกู้คืน</li>
+                </ul>
+                <p>ไฟล์: <strong>${file.name}</strong></p>
+                <p>ขนาด: <strong>${(file.size / 1024).toFixed(2)} KB</strong></p>
+            </div>
+        `,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
-        confirmButtonText: 'กู้คืนข้อมูล',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: '<i class="fas fa-upload"></i> กู้คืนข้อมูล',
         cancelButtonText: 'ยกเลิก'
     }).then((result) => {
-        if(result.isConfirmed) {
+        if (result.isConfirmed) {
             const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
+            formData.append('file', file);
             
             Swal.fire({
                 title: 'กำลังกู้คืนข้อมูล...',
+                html: '<div class="progress" style="height: 20px;"><div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div></div><p class="mt-2">กรุณารอสักครู่ ห้ามปิดหน้านี้</p>',
                 allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
+                showConfirmButton: false
             });
             
             $.ajax({
@@ -617,22 +644,39 @@ function restoreDatabase() {
                 processData: false,
                 contentType: false,
                 dataType: 'json',
+                timeout: 300000, // 5 นาที
                 success: function(response) {
-                    if(response.success) {
+                    if (response.success) {
                         Swal.fire({
                             icon: 'success',
-                            title: 'สำเร็จ!',
-                            text: 'กู้คืนข้อมูลเรียบร้อย ระบบจะรีเฟรช',
-                            confirmButtonText: 'ตกลง'
+                            title: 'กู้คืนสำเร็จ!',
+                            html: `
+                                <div class="text-start">
+                                    <p>✅ สำเร็จ: ${response.data.success_count} คำสั่ง</p>
+                                    ${response.data.error_count > 0 ? '<p class="text-warning">⚠️ มีข้อผิดพลาด: ' + response.data.error_count + ' คำสั่ง</p>' : ''}
+                                    <p>📁 สำรองก่อนกู้คืน: ${response.data.backup_before}</p>
+                                </div>
+                            `,
+                            confirmButtonText: 'รีเฟรชหน้า',
+                            confirmButtonColor: '#3085d6'
                         }).then(() => {
                             location.reload();
                         });
                     } else {
-                        Swal.fire('ผิดพลาด!', response.message, 'error');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'ผิดพลาด!',
+                            text: response.message || 'ไม่สามารถกู้คืนได้'
+                        });
                     }
                 },
-                error: function() {
-                    Swal.fire('ผิดพลาด!', 'ไม่สามารถกู้คืนข้อมูลได้', 'error');
+                error: function(xhr, status, error) {
+                    console.error('Restore error:', status, error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'ผิดพลาด!',
+                        text: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ (Status: ' + xhr.status + ')'
+                    });
                 }
             });
         }

@@ -1,5 +1,6 @@
 <?php
 // includes/sidebar.php
+ob_start();
 if (!isset($_SESSION)) {
     session_start();
 }
@@ -90,7 +91,7 @@ function isActiveGroup($pages)
         </li>
 
         <!-- ✅ เพิ่มเมนู Executive Dashboard (เฉพาะ admin) -->
-        <?php if ($user_role == 'admin'): ?>
+        <?php if ($_SESSION['user_role'] == 'admin'): ?>
         <li class="nav-item">
             <a class="nav-link <?php echo isActive('executive_dashboard.php'); ?>" 
             href="executive_dashboard.php">
@@ -99,12 +100,12 @@ function isActiveGroup($pages)
                 <small class="text-white-50 ms-auto"></small>
             </a>
         </li>
-        <?php endif; ?>
 
         <div class="sidebar-divider"></div>
+        <?php endif; ?>
 
         <!-- Customer -->
-        <?php if (in_array($user_role, ['admin_page', 'admin'])): ?>
+        <?php if (in_array($_SESSION['user_role'], ['admin_page', 'admin'])): ?>
             <li class="nav-item">
                 <a class="nav-link <?php echo isActive('customers.php'); ?>" href="customers.php">
                     <i class="fas fa-users"></i>
@@ -114,7 +115,7 @@ function isActiveGroup($pages)
         <?php endif; ?>
 
         <!-- Cases -->
-        <?php if (in_array($user_role, ['admin_page', 'admin', 'support'])): ?>
+        <?php if (in_array($_SESSION['user_role'], ['admin_page', 'admin', 'support'])): ?>
             <li class="nav-item">
                 <a class="nav-link <?php echo isActive('cases.php'); ?>" href="cases.php">
                     <i class="fas fa-folder-open"></i>
@@ -122,14 +123,14 @@ function isActiveGroup($pages)
                     <span class="badge bg-warning ms-auto" id="menuCaseCount">0</span>
                 </a>
             </li>
+        <div class="sidebar-divider"></div>
         <?php endif; ?>
 
-        <div class="sidebar-divider"></div>
 
         <!-- ==================== เมนูที่มี case_id ==================== -->
 
         <!-- Case Detail -->
-        <?php if (in_array($user_role, ['admin_page', 'admin', 'support'])): ?>
+        <?php if (in_array($_SESSION['user_role'], ['admin_page', 'admin', 'support'])): ?>
             <li class="nav-item">
                 <a class="nav-link <?php echo isActive('case_detail.php'); ?>"
                     href="<?php echo url('case_detail.php'); ?>"
@@ -142,7 +143,7 @@ function isActiveGroup($pages)
         <?php endif; ?>
 
         <!-- Follow -->
-        <?php if (in_array($user_role, ['admin_page', 'admin'])): ?>
+        <?php if (in_array($_SESSION['user_role'], ['admin_page', 'admin'])): ?>
             <li class="nav-item">
                 <a class="nav-link <?php echo isActive('follow.php'); ?>"
                     href="<?php echo url('follow.php'); ?>"
@@ -151,12 +152,12 @@ function isActiveGroup($pages)
                     <span class="nav-text">ติดตามลูกค้า</span>
                 </a>
             </li>
-        <?php endif; ?>
 
         <div class="sidebar-divider"></div>
+        <?php endif; ?>
 
         <!-- KPI -->
-        <?php if (in_array($user_role, ['kpi', 'admin'])): ?>
+        <?php if (in_array($_SESSION['user_role'], ['kpi', 'admin'])): ?>
             <li class="nav-item">
                 <a class="nav-link <?php echo isActive('kpi_check.php'); ?>" href="kpi_check.php">
                     <i class="fas fa-check-circle"></i>
@@ -164,12 +165,12 @@ function isActiveGroup($pages)
                     <span class="badge bg-danger ms-auto" id="menuKpiCount">0</span>
                 </a>
             </li>
-        <?php endif; ?>
 
         <div class="sidebar-divider"></div>
+        <?php endif; ?>
 
         <!-- ==================== SUPPORT MODULES ==================== -->
-        <?php if (in_array($user_role, ['support', 'admin'])): ?>
+        <?php if (in_array($_SESSION['user_role'], ['support', 'admin'])): ?>
             <li class="sidebar-heading"><span>📋 ฝ่าย Support</span></li>
 
             <li class="nav-item">
@@ -235,12 +236,11 @@ function isActiveGroup($pages)
                 </a>
             </li>
 
+        <div class="sidebar-divider"></div>
         <?php endif; ?>
 
-        <div class="sidebar-divider"></div>
-
         <!-- ==================== ADMIN MODULES ==================== -->
-        <?php if ($user_role == 'admin'): ?>
+        <?php if ($_SESSION['user_role'] == 'admin'): ?>
             <li class="sidebar-heading"><span>⚙️ ผู้ดูแลระบบ</span></li>
 
             <li class="nav-item">
@@ -278,9 +278,9 @@ function isActiveGroup($pages)
                 </a>
             </li>
 
-        <?php endif; ?>
-
         <div class="sidebar-divider"></div>
+
+        <?php endif; ?>
 
         <!-- ==================== USER MENU ==================== -->
         <li class="sidebar-heading"><span>👤 ผู้ใช้งาน</span></li>
@@ -324,7 +324,7 @@ function isActiveGroup($pages)
                 <div class="user-role">
                     <?php
                     $roles = ['admin' => '👑 Admin', 'admin_page' => '📄 Admin Page', 'kpi' => '✅ KPI', 'support' => '🔧 Support'];
-                    echo $roles[$user_role] ?? $user_role;
+                    echo $roles[$_SESSION['user_role']] ?? $_SESSION['user_role'];
                     ?>
                 </div>
             </div>
@@ -335,7 +335,7 @@ function isActiveGroup($pages)
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li><a class="dropdown-item" href="profile.php"><i class="fas fa-user-circle text-primary"></i> ข้อมูลส่วนตัว</a></li>
                     <li><a class="dropdown-item" href="change_password.php"><i class="fas fa-key text-warning"></i> เปลี่ยนรหัสผ่าน</a></li>
-                    <?php if ($user_role == 'admin'): ?>
+                    <?php if ($_SESSION['user_role'] == 'admin'): ?>
                         <li><a class="dropdown-item" href="settings.php"><i class="fas fa-cog text-secondary"></i> ตั้งค่าระบบ</a></li>
                     <?php endif; ?>
                     <li>
