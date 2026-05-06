@@ -437,7 +437,7 @@ if(!checkRole(['admin_page', 'admin'])) {
 </div>
 
 <script>
-    let currentCustomerId = null;
+let currentCustomerId = null;
 let currentPage = 1;
 let searchTimeout = null;
 

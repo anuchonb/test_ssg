@@ -248,89 +248,191 @@ function editProject(id) {
     });
 }
 
-// ฟังก์ชั่นบันทึกโครงการ
+// ✅ บันทึกโครงการ (SweetAlert2)
 function saveProject() {
-    console.log('saveProject called');
-    
-    const name = $('#project_name').val().trim();
-    const price = $('#project_price').val();
-    const zone = $('#project_zone').val();
-    const projectId = $('#project_id').val();
+    let name = $('#project_name').val().trim();
+    let price = $('#project_price').val();
+    let zone = $('#project_zone').val();
     
     // Validate
-    if(!name) {
-        alert('กรุณากรอกชื่อโครงการ');
+    if (!name) {
+        Swal.fire({ icon: 'warning', title: 'กรุณากรอกชื่อโครงการ', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
         $('#project_name').focus();
         return;
     }
-    
-    if(!price || price <= 0) {
-        alert('กรุณากรอกราคา');
+    if (!price || price <= 0) {
+        Swal.fire({ icon: 'warning', title: 'กรุณากรอกราคา', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
         $('#project_price').focus();
         return;
     }
-    
-    if(!zone) {
-        alert('กรุณาเลือกโซน');
+    if (!zone) {
+        Swal.fire({ icon: 'warning', title: 'กรุณาเลือกโซน', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
         return;
     }
-    
-    // ถามยืนยัน
-    if(!confirm('ยืนยันการบันทึกโครงการ: ' + name + '?')) {
-        return;
-    }
-    
-    // ส่งข้อมูล
-    const url = projectId ? '../api/projects/update.php' : '../api/projects/create.php';
-    
-    $.ajax({
-        url: url,
-        type: 'POST',
-        data: JSON.stringify({
-            id: projectId,
-            name: name,
-            price: price,
-            zone: zone
-        }),
-        contentType: 'application/json',
-        dataType: 'json',
-        success: function(response) {
-            console.log('Save response:', response);
-            if(response.success) {
-                $('#projectModal').modal('hide');
-                alert('บันทึกสำเร็จ!');
-                loadProjects();
-                loadProjectStats();
-            } else {
-                alert('ผิดพลาด: ' + (response.message || 'ไม่สามารถบันทึกได้'));
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('Save error:', error);
-            alert('ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่');
+
+    let isEdit = $('#project_id').val() ? true : false;
+
+    Swal.fire({
+        title: isEdit ? 'ยืนยันการแก้ไข?' : 'ยืนยันการเพิ่ม?',
+        html: '<strong>' + name + '</strong><br>ราคา: ' + numberFormat(price) + ' บาท<br>โซน: ' + zone,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-save"></i> บันทึก',
+        cancelButtonText: 'ยกเลิก'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Disable button
+            let btn = $('.modal-footer .btn-primary');
+            let origText = btn.html();
+            btn.html('<span class="spinner-border spinner-border-sm"></span> กำลังบันทึก...').prop('disabled', true);
+
+            let url = isEdit ? '../api/projects/update.php' : '../api/projects/create.php';
+            let data = {
+                id: $('#project_id').val(),
+                name: name,
+                price: price,
+                zone: zone
+            };
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                dataType: 'json',
+                timeout: 10000,
+                success: function(res) {
+                    btn.html(origText).prop('disabled', false);
+                    
+                    if (res.success) {
+                        $('#projectModal').modal('hide');
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'สำเร็จ!',
+                            text: res.message || 'บันทึกเรียบร้อย',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        loadProjects(currentPage);
+                        loadProjectStats();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'ผิดพลาด',
+                            text: res.message || 'ไม่สามารถบันทึกได้'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    btn.html(origText).prop('disabled', false);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'ผิดพลาด',
+                        text: 'ไม่สามารถบันทึกได้ (Status: ' + xhr.status + ')'
+                    });
+                }
+            });
         }
     });
 }
 
-// ฟังก์ชั่นลบโครงการ
+// ✅ ฟังก์ชั่นลบโครงการ (SweetAlert2)
 function deleteProject(id) {
-    if(!confirm('ยืนยันการลบโครงการ? การลบไม่สามารถกู้คืนได้')) {
-        return;
-    }
-    
+    Swal.fire({
+        title: 'ยืนยันการลบโครงการ?',
+        text: 'การลบไม่สามารถกู้คืนได้ ข้อมูลลูกค้าและเคสที่เกี่ยวข้องจะถูกโอนไปยังโครงการอื่น',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: '<i class="fas fa-trash"></i> ลบโครงการ',
+        cancelButtonText: '<i class="fas fa-times"></i> ยกเลิก',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // แสดง loading
+            Swal.fire({
+                title: 'กำลังลบโครงการ...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $.ajax({
+                url: '../api/projects/delete.php',
+                type: 'POST',
+                data: JSON.stringify({ id: id }),
+                contentType: 'application/json',
+                dataType: 'json',
+                timeout: 10000,
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'ลบสำเร็จ!',
+                            text: 'ลบโครงการเรียบร้อยแล้ว',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        loadProjects();
+                        loadProjectStats();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'ผิดพลาด',
+                            text: response.message || 'ไม่สามารถลบโครงการได้'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'ผิดพลาด',
+                        text: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ (Status: ' + xhr.status + ')'
+                    });
+                }
+            });
+        }
+    });
+}
+
+// ✅ ยืนยันลบโครงการ (ตรวจสอบลูกค้าก่อน)
+function confirmDeleteProject(id) {
+    // ตรวจสอบว่ามีลูกค้าหรือไม่
     $.ajax({
-        url: '../api/projects/delete.php',
-        type: 'POST',
-        data: JSON.stringify({ id: id }),
-        contentType: 'application/json',
+        url: '../api/projects/check_customers.php',
+        type: 'GET',
+        data: { id: id },
         dataType: 'json',
         success: function(response) {
-            if(response.success) {
-                alert('ลบสำเร็จ!');
-                loadProjects();
-                loadProjectStats();
-            } else {
-                alert('ผิดพลาด: ' + (response.message || 'ไม่สามารถลบได้'));
+            if (response.success) {
+                let count = response.customer_count || 0;
+                let caseCount = response.case_count || 0;
+                
+                let warningText = '';
+                if (count > 0) {
+                    warningText = '<div class="alert alert-warning text-start mt-2">' +
+                        '<i class="fas fa-exclamation-triangle"></i> ' +
+                        'โครงการนี้มีลูกค้า <strong>' + count + ' คน</strong> และเคส <strong>' + caseCount + ' เคส</strong>' +
+                        '<br>การลบจะโอนข้อมูลทั้งหมดไปยังโครงการว่าง</div>';
+                }
+                
+                Swal.fire({
+                    title: 'ยืนยันการลบโครงการ?',
+                    html: warningText + '<p class="text-danger">การลบไม่สามารถกู้คืนได้</p>',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: '<i class="fas fa-trash"></i> ลบ',
+                    cancelButtonText: 'ยกเลิก',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        deleteProject(id);
+                    }
+                });
             }
         }
     });

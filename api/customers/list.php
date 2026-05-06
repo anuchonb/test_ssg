@@ -76,7 +76,7 @@ try {
 
     // ✅ SELECT - ใส่ LIMIT ใน SQL โดยตรง ไม่เพิ่ม params
     $query = "SELECT cs.*, 
-              c.name as customer_name, 
+              c.name, 
               c.phone, 
               c.facebook,
               c.grade,

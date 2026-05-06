@@ -76,7 +76,7 @@ function isActiveGroup($pages)
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <i class="fas fa-building"></i>
-        <h4>CRM Condo</h4>
+        <h4>CRM Condo System</h4>
         <small class="text-white-50">v1.0</small>
     </div>
 

@@ -27,7 +27,7 @@ $case_id = isset($_GET['case_id']) ? intval($_GET['case_id']) : 0;
         <!-- Page Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="mb-1">🏠 จำนอง</h2>
+                <h2 class="mb-1">🏠 จำนอง  - Case #<?php echo $case_id; ?></h2>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>

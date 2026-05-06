@@ -468,15 +468,65 @@ function loadFileList() {
     });
 }
 
-// ลบไฟล์
+// ✅ ลบไฟล์ (SweetAlert2)
 function deleteFile(id) {
-    if(!confirm('ยืนยันการลบเอกสารนี้?')) return;
-    $.post('../api/file/delete.php', JSON.stringify({id:id}), function(res) {
-        if(res.success) loadFileList();
-        else alert('ผิดพลาด: ' + (res.message || ''));
-    }, 'json');
-}
+    Swal.fire({
+        title: 'ยืนยันการลบเอกสาร?',
+        text: 'ไฟล์นี้จะถูกลบออกจากระบบ ไม่สามารถกู้คืนได้',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: '<i class="fas fa-trash"></i> ลบ',
+        cancelButtonText: '<i class="fas fa-times"></i> ยกเลิก',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // แสดง loading
+            Swal.fire({
+                title: 'กำลังลบไฟล์...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
 
+            $.ajax({
+                url: '../api/file/delete.php',
+                type: 'POST',
+                data: JSON.stringify({ id: id }),
+                contentType: 'application/json',
+                dataType: 'json',
+                timeout: 10000,
+                success: function(res) {
+                    if (res.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'ลบสำเร็จ!',
+                            text: 'ลบเอกสารเรียบร้อยแล้ว',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                        loadFileList();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'ผิดพลาด',
+                            text: res.message || 'ไม่สามารถลบไฟล์ได้'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'ผิดพลาด',
+                        text: 'ไม่สามารถลบไฟล์ได้ (Status: ' + xhr.status + ')'
+                    });
+                }
+            });
+        }
+    });
+}
 // เปิดรูปภาพ
 function openImageViewer(src) {
     $('#viewerImage').attr('src', src);

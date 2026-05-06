@@ -27,7 +27,7 @@ $case_id = isset($_GET['case_id']) ? intval($_GET['case_id']) : 0;
         <!-- Page Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="mb-1">💳 ปิดหนี้</h2>
+                <h2 class="mb-1">💳 ปิดหนี้  - Case #<?php echo $case_id; ?></h2>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
@@ -325,69 +325,110 @@ function calcDebtTotal() {
     $('#debtTotal').text(numberFormat(total) + ' บาท');
 }
 
-// ✅ บันทึกการปิดหนี้
+// ✅ บันทึกการปิดหนี้ (SweetAlert2 เต็มรูปแบบ)
 function saveDebt() {
     let items = [];
     let hasError = false;
-    
+
     $('.debt-item').each(function() {
         let detail = $(this).find('input[id^="debt_detail_"]').val();
         let amount = $(this).find('input[id^="debt_amount_"]').val();
-        
-        if(!detail || !amount) {
+
+        if (!detail || !amount) {
             hasError = true;
             return false;
         }
         items.push({ detail: detail, amount: parseFloat(amount) });
     });
-    
-    if(hasError || items.length === 0) {
-        alert('กรุณากรอกรายละเอียดและจำนวนเงินให้ครบทุกรายการ');
+
+    // ❌ ข้อมูลไม่ครบ
+    if (hasError || items.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'ข้อมูลไม่ครบถ้วน',
+            text: 'กรุณากรอกรายละเอียดและจำนวนเงินให้ครบทุกรายการ',
+            toast: true,
+            position: 'top-end',
+            timer: 3000,
+            showConfirmButton: false
+        });
         return;
     }
-    
-    if(!confirm('บันทึกการปิดหนี้?\nจำนวน ' + items.length + ' รายการ\nรวม: ' + $('#debtTotal').text())) return;
-    
-    let data = {
-        case_id: CASE_ID,
-        clear_date: $('#debt_clear_date').val(),
-        location: $('#debt_location').val(),
-        staff_name: $('#debt_staff_name').val(),
-        note: $('#debt_note').val(),
-        items: items
-    };
-    
-    let btn = $('.btn-primary').last();
-    let origText = btn.html();
-    btn.html('<span class="spinner-border spinner-border-sm"></span> กำลังบันทึก...').prop('disabled', true);
-    
-    $.ajax({
-        url: '../api/debt/save.php',
-        type: 'POST',
-        data: JSON.stringify(data),
-        contentType: 'application/json',
-        dataType: 'json',
-        timeout: 10000,
-        success: function(res) {
-            btn.html(origText).prop('disabled', false);
-            if(res.success) {
-                Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', timer: 2000, showConfirmButton: false });
-                // ✅ โหลดประวัติใหม่
-                loadDebtHistory();
-            } else {
-                Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: res.message || '' });
-            }
-        },
-        error: function(xhr) {
-            btn.html(origText).prop('disabled', false);
-            Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: 'Status: ' + xhr.status });
+
+    // ✅ ยืนยันการบันทึก
+    Swal.fire({
+        title: 'ยืนยันการบันทึกปิดหนี้?',
+        html: `
+            <div class="text-start">
+                <p>📋 <strong>จำนวนรายการ:</strong> ${items.length} รายการ</p>
+                <p>💰 <strong>ยอดรวม:</strong> ${$('#debtTotal').text()}</p>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="fas fa-save"></i> บันทึก',
+        cancelButtonText: '<i class="fas fa-times"></i> ยกเลิก'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            let data = {
+                case_id: CASE_ID,
+                clear_date: $('#debt_clear_date').val(),
+                location: $('#debt_location').val(),
+                staff_name: $('#debt_staff_name').val(),
+                note: $('#debt_note').val(),
+                items: items
+            };
+
+            // Loading
+            Swal.fire({
+                title: 'กำลังบันทึก...',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            // Call API
+            $.ajax({
+                url: '../api/debt/save.php',
+                type: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                dataType: 'json',
+                timeout: 10000,
+                success: function(res) {
+                    if (res.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'บันทึกสำเร็จ!',
+                            text: 'บันทึกการปิดหนี้เรียบร้อยแล้ว',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        loadDebtHistory();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'ผิดพลาด',
+                            text: res.message || 'ไม่สามารถบันทึกได้'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'ผิดพลาด',
+                        text: 'ไม่สามารถบันทึกได้ (Status: ' + xhr.status + ')'
+                    });
+                }
+            });
         }
     });
 }
 
 // Copy ส่ง LINE
 function copyDebtToClipboard() {
-    let text = '💳 ปิดหนี้ Case #' + CASE_ID + '\n';
+    let text = '💳 ปิดหนี้ Case #' + <?php echo $case_id; ?> + '\n';
     $('.debt-item').each(function() {
         let detail = $(this).find('input[id^="debt_detail_"]').val();
         let amount = $(this).find('input[id^="debt_amount_"]').val();

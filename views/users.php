@@ -542,7 +542,7 @@ function showTableEmpty(message) {
 
 // ============ LOAD USER STATS ============
 function loadUserStats() {
-    console.log('loadUserStats() called');
+    // console.log('loadUserStats() called');
     
     $.ajax({
         url: '../api/users/list.php',
@@ -550,7 +550,7 @@ function loadUserStats() {
         dataType: 'json',
         timeout: 10000,
         success: function(response) {
-            console.log('Stats response:', response);
+            // console.log('Stats response:', response);
             
             if(response.success && response.data) {
                 const users = response.data;
@@ -577,7 +577,7 @@ function loadUserStats() {
 
 // ============ LOAD ACTIVITY LOG ============
 function loadActivityLog() {
-    console.log('loadActivityLog() called');
+    // console.log('loadActivityLog() called');
     
     $.ajax({
         url: '../api/dashboard/recent_activities.php',
@@ -616,7 +616,7 @@ function loadActivityLog() {
 
 // ============ CRUD FUNCTIONS ============
 function showUserForm() {
-    console.log('showUserForm() called');
+    // console.log('showUserForm() called');
     
     currentUserId = null;
     $('#user_id').val('');
@@ -638,7 +638,7 @@ function showUserForm() {
 }
 
 function editUser(id) {
-    console.log('editUser() called with id:', id);
+    // console.log('editUser() called with id:', id);
     
     if(id == CURRENT_USER_ID) {
         window.location.href = 'profile.php';
