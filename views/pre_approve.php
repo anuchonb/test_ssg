@@ -14,11 +14,30 @@ $case_id = isset($_GET['case_id']) ? intval($_GET['case_id']) : 0;
 
 <div class="main-content">
     <div class="container-fluid">
+
+        <!-- Page Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>📋 Pre-Approve - Case #<?php echo $case_id; ?></h2>
-            <a href="case_detail.php?case_id=<?php echo $case_id; ?>" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> กลับ
-            </a>
+            <div>
+                <h2 class="mb-1">📋 Pre-Approve  - Case #<?php echo $case_id; ?></h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
+                        <?php if($case_id): ?>
+                            <li class="breadcrumb-item"><a href="case_detail.php?case_id=<?php echo $case_id; ?>">Case #<?php echo $case_id; ?></a></li>
+                        <?php endif; ?>
+                        <li class="breadcrumb-item active">Pre-Approve</li>
+                    </ol>
+                </nav>
+            </div>
+            <?php if($case_id): ?>
+                <a href="case_detail.php?case_id=<?php echo $case_id; ?>" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> กลับไปเคส
+                </a>
+            <?php else: ?>
+                <a href="cases.php" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> กลับ
+                </a>
+            <?php endif; ?>
         </div>
 
         <div class="row">
@@ -97,6 +116,17 @@ $case_id = isset($_GET['case_id']) ? intval($_GET['case_id']) : 0;
             
             <!-- Customer Summary -->
             <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="fas fa-info-circle"></i> ข้อมูลเคส #<?php echo $case_id; ?></h6>
+                    </div>
+                    <div class="card-body" id="caseInfoSummary">
+                        <div class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm"></div> กำลังโหลด...
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card">
                     <div class="card-header">
                         <h5>ข้อมูลลูกค้า</h5>

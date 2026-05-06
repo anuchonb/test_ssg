@@ -3,6 +3,7 @@ const CASE_ID = new URLSearchParams(window.location.search).get('case_id');
 
 $(document).ready(function() {
     loadCustomerSummary();
+    loadCaseSummary();
     loadPreapproveData();
     loadPreapproveHistory();
     
@@ -18,6 +19,44 @@ function calculateTotal() {
     const furniture = parseFloat($('#pa_furniture_amount').val()) || 0;
     const total = room + insurance + furniture;
     $('#pa_amount').val(total);
+}
+
+// ✅ โหลดข้อมูลเคสสรุป
+function loadCaseSummary() {
+    $.ajax({
+        url: '../api/cases/get.php',
+        type: 'GET',
+        data: { id: CASE_ID },  // ✅ ใช้ id (api/cases/get.php รับ id)
+        dataType: 'json',
+        timeout: 10000,
+        success: function(res) {
+            console.log('Case info response:', res);
+            
+            if (res.success && res.data) {
+                let c = res.data;
+                let html = 
+                    '<p><strong>ลูกค้า:</strong> ' + (c.customer_name || '-') + '</p>' +
+                    '<p><strong>เบอร์โทร:</strong> ' + (c.phone || '-') + '</p>' +
+                    '<p><strong>สถานะ:</strong> <span class="badge bg-primary">' + (c.status || '-') + '</span></p>' +
+                    '<p><strong>เจ้าของเคส:</strong> ' + (c.owner_name || '-') + '</p>' +
+                    '<a href="case_detail.php?case_id=' + CASE_ID + '" class="btn btn-sm btn-outline-info">ดูรายละเอียดเคส</a>';
+                $('#caseInfoSummary').html(html);
+            } else {
+                $('#caseInfoSummary').html('<div class="alert alert-warning">ไม่พบข้อมูลเคส #' + CASE_ID + '</div>');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Load case error:', status, error);
+            console.error('Response:', xhr.responseText);
+            $('#caseInfoSummary').html(
+                '<div class="alert alert-danger">' +
+                    '❌ ไม่สามารถโหลดข้อมูลเคสได้<br>' +
+                    '<small>Status: ' + xhr.status + '</small><br>' +
+                    '<button class="btn btn-sm btn-outline-danger mt-1" onclick="loadCaseSummary()">ลองใหม่</button>' +
+                '</div>'
+            );
+        }
+    });
 }
 
 function loadCustomerSummary() {
