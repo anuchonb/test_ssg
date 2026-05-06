@@ -91,7 +91,6 @@ function isActiveGroup($pages)
             </a>
         </li>
 
-        <?php if (false): // เปลี่ยนเป็น true เมื่อถึงเฟสนั้น ?>
         <!-- ✅ เพิ่มเมนู Executive Dashboard (เฉพาะ admin) -->
         <?php if ($_SESSION['user_role'] == 'admin'): ?>
         <li class="nav-item">
@@ -102,7 +101,6 @@ function isActiveGroup($pages)
                 <small class="text-white-50 ms-auto"></small>
             </a>
         </li>
-        <?php endif; ?>
 
         <div class="sidebar-divider"></div>
         <?php endif; ?>
@@ -159,9 +157,6 @@ function isActiveGroup($pages)
         <div class="sidebar-divider"></div>
         <?php endif; ?>
 
-        
-        <?php if (false): // เปลี่ยนเป็น true เมื่อถึงเฟสนั้น ?>
-
         <!-- KPI -->
         <?php if (in_array($_SESSION['user_role'], ['kpi', 'admin'])): ?>
             <li class="nav-item">
@@ -175,6 +170,7 @@ function isActiveGroup($pages)
         <div class="sidebar-divider"></div>
         <?php endif; ?>
 
+        <!-- ==================== SUPPORT MODULES ==================== -->
         <?php if (in_array($_SESSION['user_role'], ['support', 'admin'])): ?>
             <li class="sidebar-heading"><span>📋 ฝ่าย Support</span></li>
 
@@ -242,7 +238,6 @@ function isActiveGroup($pages)
             </li>
 
         <div class="sidebar-divider"></div>
-        <?php endif; ?>
         <?php endif; ?>
 
         <!-- ==================== ADMIN MODULES ==================== -->
