@@ -702,7 +702,7 @@ function renderCustomersTable(customers) {
                 <td>${c.channel || '-'}</td>
                 <td>${gradeBadge}</td>
                 <td>${c.project_name || '-'}</td>
-                <td class="text-end">${c.price ? numberFormat(c.price) + ' บาท' : '-'}</td>
+                <td>${c.price ? numberFormat(c.price) + '฿' : '-'}</td>
                 <td>${debtBadge}</td>
                 <td>${caseBadge}</td>
                 <td><small>${formatDateThai(c.created_at)}</small></td>
@@ -779,14 +779,20 @@ function showCustomerForm() {
     $('#customerModal').modal('show');
 }
 
+// ✅ แก้ไขลูกค้า (คลิกจากตาราง)
 function editCustomer(id) {
-    // Show loading
+    console.log('editCustomer called with id:', id);
+    
+    if (!id) {
+        alert('ไม่พบ ID ลูกค้า');
+        return;
+    }
+    
+    // แสดง loading
     Swal.fire({
         title: 'กำลังโหลดข้อมูล...',
         allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
+        didOpen: () => { Swal.showLoading(); }
     });
     
     $.ajax({
@@ -794,21 +800,35 @@ function editCustomer(id) {
         type: 'GET',
         data: { id: id },
         dataType: 'json',
+        timeout: 10000,
         success: function(response) {
             Swal.close();
+            //console.log('Edit customer response:', response);
             
-            if(response.success && response.data) {
+            if (response.success && response.data) {
+                // ✅ เติมข้อมูล
                 fillCustomerForm(response.data);
+                
+                // ✅ แสดง modal
                 $('#customerModalTitle').html('<i class="fas fa-edit"></i> แก้ไขข้อมูลลูกค้า');
-                $('#btnCreateCase').show();
                 $('#customerModal').modal('show');
+                
             } else {
-                Swal.fire('ผิดพลาด!', 'ไม่พบข้อมูลลูกค้า', 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'ผิดพลาด',
+                    text: 'ไม่พบข้อมูลลูกค้า'
+                });
             }
         },
-        error: function() {
+        error: function(xhr, status, error) {
             Swal.close();
-            Swal.fire('ผิดพลาด!', 'ไม่สามารถโหลดข้อมูลได้', 'error');
+            // console.error('Edit customer error:', status, error);
+            Swal.fire({
+                icon: 'error',
+                title: 'ผิดพลาด',
+                text: 'ไม่สามารถโหลดข้อมูลได้ (Status: ' + xhr.status + ')'
+            });
         }
     });
 }
@@ -836,9 +856,12 @@ function fillCustomerForm(customer) {
     $('#welfare').val(customer.welfare);
     $('#debt_status').val(customer.debt_status);
     
-    // Update phone status
+    // ✅ อัปเดตสถานะเบอร์โทร
     $('#phoneStatus').html('<i class="fas fa-check text-success"></i>');
-    $('#phoneFeedback').html('<small class="text-success">✅ แก้ไขข้อมูลลูกค้า</small>');
+    $('#phoneFeedback').html('<small class="text-success">✅ ข้อมูลลูกค้าเดิม</small>');
+    
+    // ✅ แสดงปุ่มส่งเคส
+    $('#btnCreateCase').show();
     
     updateCreateCaseButton();
 }
@@ -854,48 +877,139 @@ function resetCustomerForm() {
     $('.is-invalid').removeClass('is-invalid');
 }
 
+// ✅ ตรวจสอบเบอร์โทร และเติมข้อมูลอัตโนมัติ
 function checkCustomerByPhone(phone) {
-    if(!phone || phone.length < 9) {
+    if (!phone || phone.length < 9) {
         $('#phoneStatus').html('<i class="fas fa-search"></i>');
         $('#phoneFeedback').html('');
         return;
     }
-    
-    // Don't check if editing same customer
-    if(currentCustomerId) return;
-    
+
+    // ไม่ตรวจสอบถ้ากำลังแก้ไขลูกค้าอยู่
+    if (currentCustomerId) return;
+
+    // แสดง loading
     $('#phoneStatus').html('<i class="fas fa-spinner fa-spin"></i>');
-    
-    $.ajax({
-        url: '../api/customers/get.php',
+    $('#phoneFeedback').html('<small class="text-muted">กำลังค้นหา...</small>');
+
+    $.ajax({        url: '../api/customers/get.php',
         type: 'GET',
         data: { phone: phone },
         dataType: 'json',
+        timeout: 10000,
         success: function(response) {
-            if(response.success && response.data) {
+            console.log('Phone check response:', response);
+            
+            if (response.success && response.data) {
                 const customer = response.data;
                 
+                // ✅ แสดงข้อความพร้อมปุ่มคลิก
                 $('#phoneStatus').html('<i class="fas fa-check text-success"></i>');
-                $('#phoneFeedback').html(`
-                    <small class="text-success">
-                        ✅ พบข้อมูล ${customer.name} | 
-                        <a href="#" onclick="fillCustomerForm(response.data); return false;" class="text-primary">
-                            คลิกเพื่อแก้ไข
-                        </a>
-                    </small>
-                `);
+                $('#phoneFeedback').html(
+                    '<small class="text-success">' +
+                        '✅ พบข้อมูล: <strong>' + (customer.name || 'ลูกค้าเดิม') + '</strong> | ' +
+                        '<a href="#" onclick="fillExistingCustomer(' + customer.id + '); return false;" class="text-primary fw-bold">' +
+                            '<i class="fas fa-edit"></i> คลิกเพื่อแก้ไข' +
+                        '</a>' +
+                    '</small>'
+                );
                 
-                // Store for later use
+                // ✅ เก็บข้อมูลลูกค้าไว้ใช้
                 window.foundCustomer = customer;
+                
+                // ✅ แสดง SweetAlert2 ถาม
+                Swal.fire({
+                    title: 'พบข้อมูลลูกค้าเดิม',
+                    html: 
+                        '<p><strong>' + (customer.name || 'ไม่ระบุ') + '</strong></p>' +
+                        '<p>เบอร์: ' + (customer.phone || '-') + '</p>' +
+                        '<p>Facebook: ' + (customer.facebook || '-') + '</p>' +
+                        '<p>Line: ' + (customer.line_id || '-') + '</p>',
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fas fa-edit"></i> แก้ไขข้อมูล',
+                    cancelButtonText: '<i class="fas fa-user-plus"></i> เพิ่มใหม่',
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#6c757d'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // ✅ คลิก "แก้ไขข้อมูล" → เติมฟอร์ม
+                        fillExistingCustomer(customer.id);
+                    }
+                    // ถ้าคลิก "เพิ่มใหม่" → ไม่ต้องทำอะไร ฟอร์มว่างอยู่แล้ว
+                });
+                
             } else {
+                // ไม่พบข้อมูล
                 $('#phoneStatus').html('<i class="fas fa-plus text-primary"></i>');
                 $('#phoneFeedback').html('<small class="text-muted">🆕 ลูกค้าใหม่</small>');
                 window.foundCustomer = null;
             }
         },
-        error: function() {
+        error: function(xhr, status, error) {
+            console.error('Phone check error:', status, error);
             $('#phoneStatus').html('<i class="fas fa-search"></i>');
             $('#phoneFeedback').html('');
+        }
+    });
+}
+
+// ✅ ฟังก์ชั่นเติมข้อมูลลูกค้าที่มีอยู่แล้ว
+function fillExistingCustomer(customerId) {
+    console.log('fillExistingCustomer called with id:', customerId);
+    
+    if (!customerId) {
+        alert('ไม่พบข้อมูลลูกค้า');
+        return;
+    }
+    
+    // แสดง loading
+    Swal.fire({
+        title: 'กำลังโหลดข้อมูล...',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+    
+    $.ajax({
+        url: '../api/customers/get.php',
+        type: 'GET',
+        data: { id: customerId },
+        dataType: 'json',
+        timeout: 10000,
+        success: function(response) {
+            Swal.close();
+            console.log('Customer detail response:', response);
+            
+            if (response.success && response.data) {
+                // ✅ เติมข้อมูลในฟอร์ม
+                fillCustomerForm(response.data);
+                
+                // ✅ เปลี่ยน title modal
+                $('#customerModalTitle').html('<i class="fas fa-edit"></i> แก้ไขข้อมูลลูกค้า');
+                
+                // ✅ แสดงปุ่มส่งเคส
+                $('#btnCreateCase').show();
+                
+                // ✅ แสดง toast
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+                Toast.fire({
+                    icon: 'success',
+                    title: 'โหลดข้อมูล ' + (response.data.name || 'ลูกค้า') + ' เรียบร้อย'
+                });
+                
+            } else {
+                alert('ไม่พบข้อมูลลูกค้า ID: ' + customerId);
+            }
+        },
+        error: function(xhr, status, error) {
+            Swal.close();
+            console.error('Load customer error:', status, error);
+            alert('ไม่สามารถโหลดข้อมูลลูกค้าได้ (Status: ' + xhr.status + ')');
         }
     });
 }

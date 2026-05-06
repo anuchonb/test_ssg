@@ -60,14 +60,14 @@ try {
     $offset = ($page - 1) * $per_page;
     
     // Get data with case info
-    $query = "SELECT c.*, p.name as project_name, 
-              cs.id as case_id, cs.status as case_status
-              FROM customers c
-              LEFT JOIN projects p ON c.project_id = p.id
-              LEFT JOIN cases cs ON c.id = cs.customer_id
-              {$whereClause}
-              ORDER BY c.created_at DESC
-              LIMIT :offset, :per_page";
+    $query = "
+        SELECT c.*, p.name as project_name, cs.id as case_id, cs.status as case_status
+        FROM customers c
+        LEFT JOIN projects p ON c.project_id = p.id
+        LEFT JOIN cases cs ON c.id = cs.customer_id
+            {$whereClause}
+        ORDER BY c.created_at DESC
+        LIMIT :offset, :per_page";
     
     $stmt = $db->prepare($query);
     foreach($params as $key => $value) {

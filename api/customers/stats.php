@@ -10,13 +10,14 @@ $database = new Database();
 $db = $database->getConnection();
 
 try {
-    $query = "SELECT 
-        COUNT(*) as total,
-        SUM(CASE WHEN grade = 'A+' THEN 1 ELSE 0 END) as grade_a_plus,
-        SUM(CASE WHEN grade = 'A' THEN 1 ELSE 0 END) as grade_a,
-        SUM(CASE WHEN grade = 'B' THEN 1 ELSE 0 END) as grade_b,
-        SUM(CASE WHEN id IN (SELECT DISTINCT customer_id FROM cases) THEN 1 ELSE 0 END) as with_cases,
-        SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as today
+    $query = "
+        SELECT 
+            COUNT(*) as total,
+            SUM(CASE WHEN grade = 'A+' THEN 1 ELSE 0 END) as grade_a_plus,
+            SUM(CASE WHEN grade = 'A' THEN 1 ELSE 0 END) as grade_a,
+            SUM(CASE WHEN grade = 'B' THEN 1 ELSE 0 END) as grade_b,
+            SUM(CASE WHEN id IN (SELECT DISTINCT customer_id FROM cases) THEN 1 ELSE 0 END) as with_cases,
+            SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as today
         FROM customers";
     
     $stmt = $db->prepare($query);
