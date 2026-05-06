@@ -1,13 +1,13 @@
 :root {
     --sidebar-width: 250px;
     --sidebar-collapsed-width: 70px;
-    --primary-color: #667eea;
-    --secondary-color: #764ba2;
-    --success-color: #1cc88a;
-    --warning-color: #f6c23e;
-    --danger-color: #e74a3b;
-    --dark-color: #5a5c69;
-}
+    --primary-color: #381094;
+    --secondary-color: #7641aa;
+    --success-color: #1da070;
+    --warning-color: #d6d31b;
+    --danger-color: #d43054;
+    --dark-color: #303033;
+}s
 
 * {
     margin: 0;
@@ -16,9 +16,9 @@
 }
 
 body {
-    font-family: 'Sarabun', sans-serif;
+    font-family: 'Google Sans', sans-serif;
     background-color: #f8f9fc;
-    color: #5a5c69;
+    color: #44454b;
     font-size: 14px;
 }
 

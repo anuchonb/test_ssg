@@ -14,8 +14,8 @@ if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRM Condo System - เข้าสู่ระบบ</title>
-     <!-- ✅ โหลดฟอนต์ Sarabun จาก Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+     <!-- โหลดฟอนต์ Sarabun จาก Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/css/custom.css" rel="stylesheet">

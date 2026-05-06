@@ -29,6 +29,9 @@ header('Content-Disposition: attachment; filename="' . $filename . '"');
 header('Pragma: no-cache');
 header('Expires: 0');
 
+// ใช้ output buffer เพื่อจับขนาดไฟล์
+ob_start();
+
 // สร้าง SQL Dump
 echo "-- phpMyAdmin SQL Dump\n";
 echo "-- version 1.0\n";
@@ -132,13 +135,26 @@ try {
     echo "/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;\n";
     echo "/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;\n";
 
-    // Log activity
-    $logQuery = "INSERT INTO case_activities (case_id, action, user_id) VALUES (NULL, ?, ?)";
+    // ✅ จับขนาดไฟล์
+    $fileContent = ob_get_contents();
+    $fileSize = strlen($fileContent);
+    
+    // ✅ บันทึก log ลงตาราง backup_logs
+    $logQuery = "INSERT INTO backup_logs (filename, file_size, user_id, created_at) VALUES (?, ?, ?, NOW())";
     $logStmt = $db->prepare($logQuery);
-    $action = "Database backup: {$filename}";
-    $logStmt->execute([$action, $_SESSION['user_id']]);
+    $logStmt->execute([$filename, $fileSize, $_SESSION['user_id']]);
+
+    // ✅ บันทึก activity log (ของเดิม)
+    $activityQuery = "INSERT INTO case_activities (case_id, action, user_id) VALUES (NULL, ?, ?)";
+    $activityStmt = $db->prepare($activityQuery);
+    $action = "Database backup: {$filename} (" . round($fileSize/1024, 2) . " KB)";
+    $activityStmt->execute([$action, $_SESSION['user_id']]);
+
+    // ส่ง output
+    ob_end_flush();
 
 } catch (PDOException $e) {
+    ob_end_clean();
     echo "-- ERROR: " . $e->getMessage() . "\n";
 }
 ?>
