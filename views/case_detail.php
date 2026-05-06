@@ -60,6 +60,7 @@ if (!$case_id) {
                 </li>
             <?php endif; ?>
 
+            <?php if (false): // เปลี่ยนเป็น true เมื่อถึงเฟสนั้น ?>
             <?php if (in_array($_SESSION['user_role'], ['kpi', 'admin'])): ?>
                 <li class="nav-item">
                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-kpi">✅ KPI</button>
@@ -89,6 +90,7 @@ if (!$case_id) {
                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-inspection">🔍 ตรวจห้อง</button>
                 </li>
             <?php endif; ?>
+            <?php endif; ?>
 
         </ul>
 
@@ -109,6 +111,8 @@ if (!$case_id) {
                 </div>
             </div>
 
+            <!-- ============ FER 2: เปิด (ปิดในเฟส 1) ============ -->
+
             <!-- Tab 2: Follow -->
             <div class="tab-pane fade" id="tab-follow">
                 <div class="card">
@@ -124,7 +128,8 @@ if (!$case_id) {
                     </div>
                 </div>
             </div>
-
+            
+            <?php if (false): // เปลี่ยนเป็น true เมื่อถึงเฟสนั้น ?>
             <!-- Tab 3: KPI -->
             <div class="tab-pane fade" id="tab-kpi">
                 <div class="card">
@@ -221,6 +226,7 @@ if (!$case_id) {
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
         </div><!-- /tab-content -->
     </div>
 </div>
