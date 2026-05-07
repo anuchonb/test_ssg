@@ -60,14 +60,14 @@ if (!$case_id) {
                 </li>
             <?php endif; ?>
 
-            <?php if (false): // เปลี่ยนเป็น true เมื่อถึงเฟสนั้น ?>
+            <?php // if (false): // เปลี่ยนเป็น true เมื่อถึงเฟสนั้น ?>
             <?php if (in_array($_SESSION['user_role'], ['kpi', 'admin'])): ?>
                 <li class="nav-item">
                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-kpi">✅ KPI</button>
                 </li>
-            <?php endif; ?>
+            <?php // endif; ?>
 
-            <?php if (in_array($_SESSION['user_role'], ['support', 'admin'])): ?>
+            <?php // if (in_array($_SESSION['user_role'], ['support', 'admin'])): ?>
                 <li class="nav-item">
                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-preapprove">📋 Pre-Approve</button>
                 </li>
@@ -90,7 +90,7 @@ if (!$case_id) {
                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-inspection">🔍 ตรวจห้อง</button>
                 </li>
             <?php endif; ?>
-            <?php endif; ?>
+            <?php // endif; ?>
 
         </ul>
 
@@ -129,7 +129,7 @@ if (!$case_id) {
                 </div>
             </div>
             
-            <?php if (false): // เปลี่ยนเป็น true เมื่อถึงเฟสนั้น ?>
+            <?php // if (false): // เปลี่ยนเป็น true เมื่อถึงเฟสนั้น ?>
             <!-- Tab 3: KPI -->
             <div class="tab-pane fade" id="tab-kpi">
                 <div class="card">
@@ -226,7 +226,7 @@ if (!$case_id) {
                     </div>
                 </div>
             </div>
-            <?php endif; ?>
+            <?php // endif; ?>
         </div><!-- /tab-content -->
     </div>
 </div>
@@ -351,5 +351,4 @@ const CASE_ID = <?php echo $case_id; ?>;
 const USER_ID = <?php echo isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0; ?>;
 </script>
 <script src="../assets/js/case_detail.js"></script>
-
 <?php include_once '../includes/footer.php'; ?>

@@ -235,6 +235,34 @@ function handleResponsive() {
   }
 }
 
+// ✅ ฟังก์ชั่นนี้ต้องมีใน sidebar.php
+function loadSidebarStats() {
+    $.ajax({
+        url: '../api/dashboard/sidebar_stats.php',
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                $('#menuCaseCount').text(response.pending_cases || '0');
+                $('#menuKpiCount').text(response.pending_kpi || '0');
+                
+                // Show/hide badges
+                if (response.pending_cases > 0) {
+                    $('#menuCaseCount').show();
+                } else {
+                    $('#menuCaseCount').hide();
+                }
+                
+                if (response.pending_kpi > 0) {
+                    $('#menuKpiCount').show();
+                } else {
+                    $('#menuKpiCount').hide();
+                }
+            }
+        }
+    });
+}
+
 // ============ ⌨️ KEYBOARD SHORTCUTS ============
 
 // ✅ รอให้ DOM โหลดเสร็จก่อน

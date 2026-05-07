@@ -3,15 +3,17 @@
 session_start();
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit(); }
 
 include_once '../../config/database.php';
 
 $database = new Database();
 $db = $database->getConnection();
 
-// เฉพาะ admin เท่านั้นที่ลบได้
-if(!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+// Admin + Admin Page ลบได้
+if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], ['admin', 'admin_page'])) {
     http_response_code(403);
     echo json_encode(["success" => false, "message" => "คุณไม่มีสิทธิ์ในการลบ"]);
     exit();
@@ -19,58 +21,54 @@ if(!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
 
 $data = json_decode(file_get_contents("php://input"));
 
-if(!empty($data->id)) {
-    try {
-        $db->beginTransaction();
-        
-        // ตรวจสอบว่ามีเคสหรือไม่
-        $check_query = "SELECT id FROM cases WHERE customer_id = :customer_id";
-        $check_stmt = $db->prepare($check_query);
-        $check_stmt->bindParam(':customer_id', $data->id);
-        $check_stmt->execute();
-        $cases = $check_stmt->fetchAll();
-        
-        // ลบข้อมูลที่เกี่ยวข้องกับเคส
-        foreach($cases as $case) {
+if (empty($data->id)) {
+    echo json_encode(["success" => false, "message" => "กรุณาระบุ ID"]);
+    exit();
+}
+
+$customer_id = intval($data->id);
+
+try {
+    $db->beginTransaction();
+
+    // ✅ ดึง case_id ทั้งหมดของลูกค้านี้
+    $stmt = $db->prepare("SELECT id FROM cases WHERE customer_id = ?");
+    $stmt->execute([$customer_id]);
+    $case_ids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    // ✅ ลบข้อมูลที่เกี่ยวข้องกับเคส (ถ้ามี)
+    if (!empty($case_ids)) {
+        foreach ($case_ids as $case_id) {
+            // ลบ debt_items ผ่าน debt_clearings (debt_items ไม่มี case_id)
+            $debt_ids = $db->prepare("SELECT id FROM debt_clearings WHERE case_id = ?")->execute([$case_id])->fetchAll(PDO::FETCH_COLUMN);
+            foreach ($debt_ids as $debt_id) {
+                $db->prepare("DELETE FROM debt_items WHERE debt_id = ?")->execute([$debt_id]);
+            }
+
+            // ✅ ตารางที่มี case_id โดยตรง
             $tables = ['follow_logs', 'kpi_checks', 'pre_approvals', 'document_steps', 
-                       'bank_submissions', 'approvals', 'debt_items', 'debt_clearings', 
+                       'bank_submissions', 'approvals', 'debt_clearings', 
                        'mortgages', 'inspections', 'case_activities', 'files'];
             
-            foreach($tables as $table) {
-                $delete_query = "DELETE FROM {$table} WHERE case_id = :case_id";
-                $delete_stmt = $db->prepare($delete_query);
-                $delete_stmt->bindParam(':case_id', $case['id']);
-                $delete_stmt->execute();
+            foreach ($tables as $table) {
+                $db->prepare("DELETE FROM {$table} WHERE case_id = ?")->execute([$case_id]);
             }
         }
-        
-        // ลบเคส
-        $delete_cases = "DELETE FROM cases WHERE customer_id = :customer_id";
-        $delete_cases_stmt = $db->prepare($delete_cases);
-        $delete_cases_stmt->bindParam(':customer_id', $data->id);
-        $delete_cases_stmt->execute();
-        
-        // ลบลูกค้า
-        $delete_customer = "DELETE FROM customers WHERE id = :id";
-        $delete_customer_stmt = $db->prepare($delete_customer);
-        $delete_customer_stmt->bindParam(':id', $data->id);
-        $delete_customer_stmt->execute();
-        
-        $db->commit();
-        
-        http_response_code(200);
-        echo json_encode([
-            "success" => true,
-            "message" => "ลบข้อมูลสำเร็จ"
-        ]);
-        
-    } catch(PDOException $e) {
-        $db->rollBack();
-        http_response_code(500);
-        echo json_encode(["success" => false, "message" => $e->getMessage()]);
     }
-} else {
-    http_response_code(400);
-    echo json_encode(["success" => false, "message" => "กรุณาระบุ ID"]);
+
+    // ลบเคส
+    $db->prepare("DELETE FROM cases WHERE customer_id = ?")->execute([$customer_id]);
+
+    // ลบลูกค้า
+    $db->prepare("DELETE FROM customers WHERE id = ?")->execute([$customer_id]);
+
+    $db->commit();
+
+    echo json_encode(["success" => true, "message" => "ลบข้อมูลสำเร็จ"]);
+
+} catch (PDOException $e) {
+    $db->rollBack();
+    http_response_code(500);
+    echo json_encode(["success" => false, "message" => $e->getMessage()]);
 }
 ?>

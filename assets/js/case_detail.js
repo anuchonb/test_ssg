@@ -1,5 +1,6 @@
-$(document).ready(function () {
+//const CASE_ID = new URLSearchParams(window.location.search).get('case_id');
 
+$(document).ready(function () {
   loadCaseInfo();
   loadCustomerDetail();
 
@@ -166,39 +167,23 @@ function saveFollow() {
   let channel = $("#follow_channel").val() || "";
   let followId = $("#follow_id").val() || "";
 
-  // ❌ Validate
+  // ✅ Validate - ใช้ common.js
   if (!status) {
-    Swal.fire({
-      icon: "warning",
-      title: "กรุณาเลือกสถานะ",
-      toast: true,
-      position: "top-end",
-      timer: 2000,
-      showConfirmButton: false,
-    });
+    showValidation("กรุณาเลือกสถานะการติดตาม");
     $("#follow_status").focus();
     return;
   }
 
-  // ✅ Confirm
-  Swal.fire({
-    title: "บันทึกการติดตาม?",
-    html: `
-            <div class="text-start">
-                <p>📞 <strong>ครั้งที่ ${step}</strong></p>
-                <p>📌 สถานะ: <strong>${getStatusLabel(status)}</strong></p>
-                ${note ? "<p>📝 " + note + "</p>" : ""}
-            </div>
-        `,
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonColor: "#3085d6",
-    cancelButtonColor: "#6c757d",
-    confirmButtonText: '<i class="fas fa-save"></i> บันทึก',
-    cancelButtonText: "ยกเลิก",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // Disable button
+  // ✅ ใช้ common.js - ลดจาก 60 บรรทัด เหลือ 20 บรรทัด
+  confirmSave(
+    `
+      <div class="text-start">
+          <p>📞 <strong>ครั้งที่ ${step}</strong></p>
+          <p>📌 สถานะ: <strong>${getStatusLabel(status)}</strong></p>
+          ${note ? "<p>📝 " + note + "</p>" : ""}
+      </div>
+  `,
+    function () {
       let btn = $(".modal-footer .btn-primary");
       let origText = btn.html();
       btn
@@ -216,51 +201,25 @@ function saveFollow() {
       };
       if (followId) postData.id = parseInt(followId);
 
-      $.ajax({
-        url: "../api/follow/add.php",
-        type: "POST",
-        data: JSON.stringify(postData),
-        contentType: "application/json",
-        dataType: "json",
-        timeout: 15000,
-        success: function (res) {
+      $.post(
+        "../api/follow/add.php",
+        JSON.stringify(postData),
+        function (res) {
           btn.html(origText).prop("disabled", false);
-
           if (res.success) {
             $("#followModal").modal("hide");
-            Swal.fire({
-              icon: "success",
-              title: "บันทึกสำเร็จ! 🎉",
-              timer: 1500,
-              showConfirmButton: false,
-            });
+            showSuccess("บันทึกสำเร็จ! 🎉");
             loadFollowList();
             loadCaseInfo();
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: "ผิดพลาด",
-              text: res.message || "ไม่สามารถบันทึกได้",
-            });
-          }
+          } else showError(res.message || "ไม่สามารถบันทึกได้");
         },
-        error: function (xhr, status, error) {
-          btn.html(origText).prop("disabled", false);
-          console.error("Follow save error:", status, error);
-
-          let msg = "ไม่สามารถบันทึกได้";
-          if (xhr.status === 0) msg = "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้";
-          else if (xhr.status === 500) msg = "เซิร์ฟเวอร์ผิดพลาด";
-
-          Swal.fire({
-            icon: "error",
-            title: "ผิดพลาด",
-            text: msg + " (Status: " + xhr.status + ")",
-          });
-        },
+        "json",
+      ).fail(function (xhr) {
+        btn.html(origText).prop("disabled", false);
+        showError("ไม่สามารถบันทึกได้ (Status: " + xhr.status + ")");
       });
-    }
-  });
+    },
+  );
 }
 
 function loadFollowList() {
@@ -301,67 +260,29 @@ function loadFollowList() {
   );
 }
 
-// ✅ ลบการติดตาม (SweetAlert2)
 function deleteFollow(id) {
-  Swal.fire({
-    title: "ยืนยันการลบ?",
-    text: "ประวัติการติดตามนี้จะถูกลบออก ไม่สามารถกู้คืนได้",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#3085d6",
-    confirmButtonText: '<i class="fas fa-trash"></i> ลบ',
-    cancelButtonText: '<i class="fas fa-times"></i> ยกเลิก',
-    reverseButtons: true,
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // Loading
-      Swal.fire({
-        title: "กำลังลบ...",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-
-      $.ajax({
-        url: "../api/follow/delete.php",
-        type: "POST",
-        data: JSON.stringify({
-          id: id,
-        }),
-        contentType: "application/json",
-        dataType: "json",
-        timeout: 10000,
-        success: function (res) {
+  confirmDelete(
+    "ประวัติการติดตามนี้จะถูกลบออก ไม่สามารถกู้คืนได้",
+    function () {
+      showLoading("กำลังลบ...");
+      $.post(
+        "../api/follow/delete.php",
+        JSON.stringify({ id: id }),
+        function (res) {
+          hideLoading();
           if (res.success) {
-            Swal.fire({
-              icon: "success",
-              title: "ลบสำเร็จ!",
-              text: "ลบประวัติการติดตามเรียบร้อยแล้ว",
-              timer: 1500,
-              showConfirmButton: false,
-            });
+            showSuccess("ลบประวัติการติดตามเรียบร้อยแล้ว");
             loadFollowList();
             loadCaseInfo();
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: "ผิดพลาด",
-              text: res.message || "ไม่สามารถลบได้",
-            });
-          }
+          } else showError(res.message || "ไม่สามารถลบได้");
         },
-        error: function (xhr) {
-          Swal.fire({
-            icon: "error",
-            title: "ผิดพลาด",
-            text: "ไม่สามารถลบได้ (Status: " + xhr.status + ")",
-          });
-        },
+        "json",
+      ).fail(function (xhr) {
+        hideLoading();
+        showError("ไม่สามารถลบได้ (Status: " + xhr.status + ")");
       });
-    }
-  });
+    },
+  );
 }
 
 // ✅ บันทึก Pre-Approve (SweetAlert2)
@@ -370,17 +291,10 @@ function savePreapprove() {
   let amount = $("#pa_amount").val();
   let note = $("#pa_note").val() || "";
 
-  // ❌ Validate
   if (!status) {
-    Swal.fire({
-      icon: "warning",
-      title: "กรุณาเลือกสถานะ",
-      text: "ต้องเลือกอย่างน้อย 1 สถานะ (กำลังดำเนินการ / อนุมัติ / ปฏิเสธ)",
-      toast: true,
-      position: "top-end",
-      timer: 3000,
-      showConfirmButton: false,
-    });
+    showValidation(
+      "ต้องเลือกอย่างน้อย 1 สถานะ (กำลังดำเนินการ / อนุมัติ / ปฏิเสธ)",
+    );
     return;
   }
 
@@ -390,76 +304,41 @@ function savePreapprove() {
     approved: "✅ อนุมัติ",
     rejected: "❌ ปฏิเสธ",
   };
+
   let statusLabel = statusLabels[status] || status;
 
-  Swal.fire({
-    title: "บันทึก Pre-Approve?",
-    html: `
-            <div class="text-start">
-                <p>📋 <strong>สถานะ:</strong> ${statusLabel}</p>
-                <p>💰 <strong>วงเงิน:</strong> ${amount ? numberFormat(amount) + " บาท" : "ไม่ระบุ"}</p>
-                ${note ? "<p>📝 <strong>หมายเหตุ:</strong> " + note + "</p>" : ""}
-            </div>
-        `,
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonColor: "#3085d6",
-    cancelButtonColor: "#6c757d",
-    confirmButtonText: '<i class="fas fa-save"></i> บันทึก',
-    cancelButtonText: "ยกเลิก",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // Loading
-      Swal.fire({
-        title: "กำลังบันทึก...",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-
-      let data = {
-        case_id: CASE_ID,
-        status: status,
-        approved_amount: amount || 0,
-        note: note,
-      };
-
-      $.ajax({
-        url: "../api/preapprove/save.php",
-        type: "POST",
-        data: JSON.stringify(data),
-        contentType: "application/json",
-        dataType: "json",
-        timeout: 10000,
-        success: function (res) {
+  confirmSave(
+    `
+      <div class="text-start">
+          <p>📋 <strong>สถานะ:</strong> ${statusLabel}</p>
+          <p>💰 <strong>วงเงิน:</strong> ${amount ? numberFormat(amount) + " บาท" : "ไม่ระบุ"}</p>
+          ${note ? "<p>📝 <strong>หมายเหตุ:</strong> " + note + "</p>" : ""}
+      </div>
+  `,
+    function () {
+      showLoading("กำลังบันทึก...");
+      $.post(
+        "../api/preapprove/save.php",
+        JSON.stringify({
+          case_id: CASE_ID,
+          status: status,
+          approved_amount: amount || 0,
+          note: note,
+        }),
+        function (res) {
+          hideLoading();
           if (res.success) {
-            Swal.fire({
-              icon: "success",
-              title: "บันทึกสำเร็จ!",
-              text: res.message || "Pre-Approve เรียบร้อย",
-              timer: 2000,
-              showConfirmButton: false,
-            });
+            showSuccess(res.message || "Pre-Approve เรียบร้อย");
             loadPreapproveHistory();
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: "ผิดพลาด",
-              text: res.message || "ไม่สามารถบันทึกได้",
-            });
-          }
+          } else showError(res.message || "ไม่สามารถบันทึกได้");
         },
-        error: function (xhr) {
-          Swal.fire({
-            icon: "error",
-            title: "ผิดพลาด",
-            text: "ไม่สามารถบันทึกได้ (Status: " + xhr.status + ")",
-          });
-        },
+        "json",
+      ).fail(function (xhr) {
+        hideLoading();
+        showError("ไม่สามารถบันทึกได้ (Status: " + xhr.status + ")");
       });
-    }
-  });
+    },
+  );
 }
 
 // Helper
@@ -687,70 +566,35 @@ function saveDocumentStatus() {
     debt_close_status: $("#doc_debt_close").val(),
   };
 
-  // ✅ Confirm
-  Swal.fire({
-    title: "บันทึกสถานะเอกสาร?",
-    html: `
-            <div class="text-start">
-                <p>📄 <strong>ขั้นที่ 1:</strong> ${$("#doc_status_1").val() || "-"}</p>
-                <p>📄 <strong>ขั้นที่ 2:</strong> ${$("#doc_status_2").val() || "-"}</p>
-                <p>📄 <strong>ขั้นที่ 3:</strong> ${$("#doc_status_3").val() || "-"}</p>
-                ${$("#doc_precheck").val() ? "<p>🔍 <strong>Pre-Check:</strong> " + $("#doc_precheck").val() + "</p>" : ""}
-                ${$("#doc_debt_close").val() ? "<p>💳 <strong>ปิดหนี้:</strong> " + $("#doc_debt_close").val() + "</p>" : ""}
-            </div>
-        `,
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonColor: "#3085d6",
-    cancelButtonColor: "#6c757d",
-    confirmButtonText: '<i class="fas fa-save"></i> บันทึก',
-    cancelButtonText: "ยกเลิก",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // Loading
-      Swal.fire({
-        title: "กำลังบันทึก...",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-
-      $.ajax({
-        url: "../api/document/update.php",
-        type: "POST",
-        data: JSON.stringify(data),
-        contentType: "application/json",
-        dataType: "json",
-        timeout: 10000,
-        success: function (res) {
+  confirmSave(
+    `
+      <div class="text-start">
+          <p>📄 <strong>ขั้นที่ 1:</strong> ${$("#doc_status_1").val() || "-"}</p>
+          <p>📄 <strong>ขั้นที่ 2:</strong> ${$("#doc_status_2").val() || "-"}</p>
+          <p>📄 <strong>ขั้นที่ 3:</strong> ${$("#doc_status_3").val() || "-"}</p>
+          ${$("#doc_precheck").val() ? "<p>🔍 <strong>Pre-Check:</strong> " + $("#doc_precheck").val() + "</p>" : ""}
+          ${$("#doc_debt_close").val() ? "<p>💳 <strong>ปิดหนี้:</strong> " + $("#doc_debt_close").val() + "</p>" : ""}
+      </div>
+  `,
+    function () {
+      showLoading("กำลังบันทึก...");
+      $.post(
+        "../api/document/update.php",
+        JSON.stringify(data),
+        function (res) {
+          hideLoading();
           if (res.success) {
-            Swal.fire({
-              icon: "success",
-              title: "บันทึกสำเร็จ!",
-              text: "สถานะเอกสารถูกบันทึกเรียบร้อยแล้ว",
-              timer: 2000,
-              showConfirmButton: false,
-            });
+            showSuccess("สถานะเอกสารถูกบันทึกเรียบร้อยแล้ว");
             updateDocSummary();
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: "ผิดพลาด",
-              text: res.message || "ไม่สามารถบันทึกได้",
-            });
-          }
+          } else showError(res.message || "ไม่สามารถบันทึกได้");
         },
-        error: function (xhr) {
-          Swal.fire({
-            icon: "error",
-            title: "ผิดพลาด",
-            text: "ไม่สามารถบันทึกได้ (Status: " + xhr.status + ")",
-          });
-        },
+        "json",
+      ).fail(function (xhr) {
+        hideLoading();
+        showError("ไม่สามารถบันทึกได้ (Status: " + xhr.status + ")");
       });
-    }
-  });
+    },
+  );
 }
 
 function loadFileList() {
@@ -819,80 +663,28 @@ function uploadFile() {
   let docType = $("#doc_type").val();
   let fileInput = $("#uploadFile")[0];
 
-  // ตรวจสอบ
-  if (!docType) {
-    Swal.fire({
-      icon: "warning",
-      title: "กรุณาเลือกประเภทเอกสาร",
-      toast: true,
-      position: "top-end",
-      timer: 2000,
-      showConfirmButton: false,
-    });
-    $("#doc_type").focus();
-    return;
-  }
-
-  if (!fileInput.files || !fileInput.files[0]) {
-    Swal.fire({
-      icon: "warning",
-      title: "กรุณาเลือกไฟล์",
-      toast: true,
-      position: "top-end",
-      timer: 2000,
-      showConfirmButton: false,
-    });
-    return;
-  }
+  if (!docType) { showValidation("กรุณาเลือกประเภทเอกสาร"); $("#doc_type").focus(); return; }
+  if (!fileInput.files || !fileInput.files[0]) { showValidation("กรุณาเลือกไฟล์"); return; }
 
   let file = fileInput.files[0];
 
-  // ตรวจสอบขนาด
-  if (file.size > 5 * 1024 * 1024) {
-    Swal.fire({
-      icon: "warning",
-      title: "ไฟล์ขนาดเกิน",
-      text: "ไฟล์ " + file.name + " มีขนาดใหญ่เกิน 5MB",
-      toast: true,
-      position: "top-end",
-      timer: 3000,
-      showConfirmButton: false,
-    });
-    return;
-  }
+  if (file.size > 5 * 1024 * 1024) { showValidation("ไฟล์ " + file.name + " มีขนาดใหญ่เกิน 5MB"); return; }
 
-  // ✅ ตรวจสอบนามสกุลไฟล์ (SweetAlert2)
   let allowed = ["jpg", "jpeg", "png", "pdf", "doc", "docx", "xls", "xlsx"];
   let ext = file.name.split(".").pop().toLowerCase();
   if (!allowed.includes(ext)) {
-    Swal.fire({
-      icon: "warning",
-      title: "ประเภทไฟล์ไม่ถูกต้อง",
-      html: `
-                <p>ไฟล์ <strong>${file.name}</strong> ไม่ได้รับอนุญาต</p>
-                <p class="text-muted">ประเภทที่รองรับ: <strong>${allowed.join(", ")}</strong></p>
-            `,
-      toast: true,
-      position: "top-end",
-      timer: 4000,
-      showConfirmButton: false,
-    });
+    showValidation(`ไฟล์ ${file.name} ไม่ได้รับอนุญาต (รองรับ: ${allowed.join(", ")})`);
     return;
   }
 
   let formData = new FormData();
   formData.append("case_id", CASE_ID);
-  formData.append("file_type", docType); // ส่งประเภทเอกสาร
+  formData.append("file_type", docType);
   formData.append("file", file);
 
-  // แสดง loading
   let btn = $(".btn-success");
   let origText = btn.html();
-  btn
-    .html(
-      '<span class="spinner-border spinner-border-sm"></span> กำลังอัปโหลด...',
-    )
-    .prop("disabled", true);
+  btn.html('<span class="spinner-border spinner-border-sm"></span> กำลังอัปโหลด...').prop("disabled", true);
 
   $.ajax({
     url: "../api/file/upload.php",
@@ -903,100 +695,21 @@ function uploadFile() {
     dataType: "json",
     success: function (res) {
       btn.html(origText).prop("disabled", false);
-
-      if (res.success) {
-        // ✅ SweetAlert2
-        Swal.fire({
-          icon: "success",
-          title: "อัปโหลดสำเร็จ! 📄",
-          timer: 2000,
-          showConfirmButton: false,
-        });
-        $("#uploadFile").val("");
-        loadFileList();
-      } else {
-        // ✅ SweetAlert2
-        Swal.fire({
-          icon: "error",
-          title: "ผิดพลาด",
-          text: res.message || "ไม่สามารถอัปโหลดได้",
-          confirmButtonText: "ตกลง",
-        });
-      }
+      if (res.success) { showSuccess("อัปโหลดสำเร็จ! 📄"); $("#uploadFile").val(""); loadFileList(); }
+      else showError(res.message || "ไม่สามารถอัปโหลดได้");
     },
-    error: function (xhr) {
-      btn.html(origText).prop("disabled", false);
-
-      // ✅ SweetAlert2
-      Swal.fire({
-        icon: "error",
-        title: "ผิดพลาด",
-        text: "ไม่สามารถอัปโหลดได้ (Status: " + xhr.status + ")",
-        confirmButtonText: "ตกลง",
-      });
-    },
+    error: function (xhr) { btn.html(origText).prop("disabled", false); showError("ไม่สามารถอัปโหลดได้ (Status: " + xhr.status + ")"); }
   });
 }
 
-// ✅ ลบไฟล์ (SweetAlert2)
 function deleteFile(id) {
-  Swal.fire({
-    title: "ยืนยันการลบเอกสาร?",
-    text: "เอกสารนี้จะถูกลบออกจากระบบ ไม่สามารถกู้คืนได้",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#3085d6",
-    confirmButtonText: '<i class="fas fa-trash"></i> ลบ',
-    cancelButtonText: '<i class="fas fa-times"></i> ยกเลิก',
-    reverseButtons: true,
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // แสดง loading
-      Swal.fire({
-        title: "กำลังลบเอกสาร...",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-
-      $.ajax({
-        url: "../api/file/delete.php",
-        type: "POST",
-        data: JSON.stringify({
-          id: id,
-        }),
-        contentType: "application/json",
-        dataType: "json",
-        timeout: 10000,
-        success: function (res) {
-          if (res.success) {
-            Swal.fire({
-              icon: "success",
-              title: "ลบสำเร็จ!",
-              text: "เอกสารถูกลบเรียบร้อยแล้ว",
-              timer: 1500,
-              showConfirmButton: false,
-            });
-            loadFileList();
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: "ผิดพลาด",
-              text: res.message || "ไม่สามารถลบเอกสารได้",
-            });
-          }
-        },
-        error: function (xhr) {
-          Swal.fire({
-            icon: "error",
-            title: "ผิดพลาด",
-            text: "ไม่สามารถลบเอกสารได้ (Status: " + xhr.status + ")",
-          });
-        },
-      });
-    }
+  confirmDelete("เอกสารนี้จะถูกลบออกจากระบบ ไม่สามารถกู้คืนได้", function() {
+    showLoading("กำลังลบเอกสาร...");
+    $.post("../api/file/delete.php", JSON.stringify({ id: id }), function(res) {
+      hideLoading();
+      if (res.success) { showSuccess("เอกสารถูกลบเรียบร้อยแล้ว"); loadFileList(); }
+      else showError(res.message || "ไม่สามารถลบเอกสารได้");
+    }, "json").fail(function(xhr) { hideLoading(); showError("ไม่สามารถลบเอกสารได้ (Status: " + xhr.status + ")"); });
   });
 }
 
@@ -1088,113 +801,32 @@ function loadBankList() {
   loadBankHistory();
 }
 
-// ✅ บันทึกการส่งธนาคาร (SweetAlert2)
 function saveBank() {
   let bankName = $("#bank_name").val();
   let submitDate = $("#bank_date").val();
   let note = $("#bank_note").val() || "";
 
-  // ❌ Validate
-  if (!bankName) {
-    Swal.fire({
-      icon: "warning",
-      title: "กรุณาเลือกธนาคาร",
-      toast: true,
-      position: "top-end",
-      timer: 2000,
-      showConfirmButton: false,
-    });
-    $("#bank_name").focus();
-    return;
-  }
+  if (!bankName) { showValidation("กรุณาเลือกธนาคาร"); $("#bank_name").focus(); return; }
+  if (!submitDate) { showValidation("กรุณาระบุวันที่ส่ง"); $("#bank_date").focus(); return; }
 
-  if (!submitDate) {
-    Swal.fire({
-      icon: "warning",
-      title: "กรุณาระบุวันที่ส่ง",
-      toast: true,
-      position: "top-end",
-      timer: 2000,
-      showConfirmButton: false,
-    });
-    $("#bank_date").focus();
-    return;
-  }
-
-  // ✅ Confirm
-  Swal.fire({
-    title: "บันทึกการส่งธนาคาร?",
-    html: `
-            <div class="text-start">
-                <p>🏦 <strong>ธนาคาร:</strong> ${bankName}</p>
-                <p>📅 <strong>วันที่ส่ง:</strong> ${submitDate}</p>
-                ${note ? "<p>📝 <strong>หมายเหตุ:</strong> " + note + "</p>" : ""}
-            </div>
-        `,
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonColor: "#3085d6",
-    cancelButtonColor: "#6c757d",
-    confirmButtonText: '<i class="fas fa-paper-plane"></i> บันทึก',
-    cancelButtonText: "ยกเลิก",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // Loading
-      Swal.fire({
-        title: "กำลังบันทึก...",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-
-      let data = {
-        case_id: CASE_ID,
-        bank_name: bankName,
-        submit_date: submitDate,
-        note: note,
-      };
-
-      $.ajax({
-        url: "../api/bank/submit.php",
-        type: "POST",
-        data: JSON.stringify(data),
-        contentType: "application/json",
-        dataType: "json",
-        timeout: 10000,
-        success: function (res) {
-          if (res.success) {
-            Swal.fire({
-              icon: "success",
-              title: "บันทึกสำเร็จ!",
-              text: "ส่งธนาคาร " + bankName + " เรียบร้อยแล้ว 🏦",
-              timer: 2000,
-              showConfirmButton: false,
-            });
-            $("#bank_note").val("");
-            loadBankHistory();
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: "ผิดพลาด",
-              text: res.message || "ไม่สามารถบันทึกได้",
-            });
-          }
-        },
-        error: function (xhr) {
-          Swal.fire({
-            icon: "error",
-            title: "ผิดพลาด",
-            text: "ไม่สามารถบันทึกได้ (Status: " + xhr.status + ")",
-          });
-        },
-      });
-    }
+  confirmSave(`
+    <div class="text-start">
+        <p>🏦 <strong>ธนาคาร:</strong> ${bankName}</p>
+        <p>📅 <strong>วันที่ส่ง:</strong> ${submitDate}</p>
+        ${note ? "<p>📝 <strong>หมายเหตุ:</strong> " + note + "</p>" : ""}
+    </div>
+  `, function() {
+    showLoading("กำลังบันทึก...");
+    $.post("../api/bank/submit.php", JSON.stringify({ case_id: CASE_ID, bank_name: bankName, submit_date: submitDate, note: note }), function(res) {
+      hideLoading();
+      if (res.success) { showSuccess("ส่งธนาคาร " + bankName + " เรียบร้อยแล้ว 🏦"); $("#bank_note").val(""); loadBankHistory(); }
+      else showError(res.message || "ไม่สามารถบันทึกได้");
+    }, "json").fail(function(xhr) { hideLoading(); showError("ไม่สามารถบันทึกได้ (Status: " + xhr.status + ")"); });
   });
 }
 
 function loadBankHistory() {
-  console.log("Loading bank history for case:", CASE_ID);
+  //console.log("Loading bank history for case:", CASE_ID);
 
   $.ajax({
     url: "../api/bank/list.php",
@@ -1205,7 +837,7 @@ function loadBankHistory() {
     dataType: "json",
     timeout: 10000,
     success: function (res) {
-      console.log("Bank history response:", res);
+      //console.log("Bank history response:", res);
 
       if (res.success && res.data && res.data.length > 0) {
         let html = '<div class="list-group list-group-flush">';
@@ -1310,94 +942,38 @@ function calcApprovalTotal() {
   $("#ap_total").val(total);
 }
 
-// ✅ บันทึกผลอนุมัติ (SweetAlert2 เต็มรูปแบบ)
 function saveApproval() {
-    let roomAmount = parseFloat($('#ap_room').val()) || 0;
-    let insuranceAmount = parseFloat($('#ap_insurance').val()) || 0;
-    let furnitureAmount = parseFloat($('#ap_furniture').val()) || 0;
-    let totalAmount = roomAmount + insuranceAmount + furnitureAmount;
-    let contractDate = $('#ap_contract').val();
-    let transferDate = $('#ap_transfer').val();
-    let note = $('#ap_note').val() || '';
+  let roomAmount = parseFloat($("#ap_room").val()) || 0;
+  let insuranceAmount = parseFloat($("#ap_insurance").val()) || 0;
+  let furnitureAmount = parseFloat($("#ap_furniture").val()) || 0;
+  let totalAmount = roomAmount + insuranceAmount + furnitureAmount;
+  let contractDate = $("#ap_contract").val();
+  let transferDate = $("#ap_transfer").val();
+  let note = $("#ap_note").val() || "";
 
-    // ✅ Confirm
-    Swal.fire({
-        title: 'บันทึกผลอนุมัติ?',
-        html: `
-            <div class="text-start">
-                <p>🏠 <strong>วงเงินห้อง:</strong> ${numberFormat(roomAmount)} บาท</p>
-                <p>🛡️ <strong>วงเงินประกัน:</strong> ${numberFormat(insuranceAmount)} บาท</p>
-                <p>🪑 <strong>วงเงินเฟอร์นิเจอร์:</strong> ${numberFormat(furnitureAmount)} บาท</p>
-                <hr>
-                <p><strong>💰 วงเงินรวม:</strong> <span class="text-success">${numberFormat(totalAmount)} บาท</span></p>
-                ${contractDate ? '<p>📅 <strong>วันเซ็นสัญญา:</strong> ' + contractDate + '</p>' : ''}
-                ${transferDate ? '<p>🏠 <strong>วันโอน:</strong> ' + transferDate + '</p>' : ''}
-                ${note ? '<p>📝 <strong>หมายเหตุ:</strong> ' + note + '</p>' : ''}
-            </div>
-        `,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: '<i class="fas fa-save"></i> บันทึก',
-        cancelButtonText: 'ยกเลิก'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Loading
-            Swal.fire({
-                title: 'กำลังบันทึก...',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            let data = {
-                case_id: CASE_ID,
-                total_amount: totalAmount,
-                room_amount: roomAmount,
-                insurance_amount: insuranceAmount,
-                furniture_amount: furnitureAmount,
-                contract_date: contractDate,
-                transfer_date: transferDate,
-                note: note
-            };
-
-            $.ajax({
-                url: '../api/approval/save.php',
-                type: 'POST',
-                data: JSON.stringify(data),
-                contentType: 'application/json',
-                dataType: 'json',
-                timeout: 10000,
-                success: function(res) {
-                    if (res.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'บันทึกสำเร็จ!',
-                            text: 'ข้อมูลการอนุมัติถูกบันทึกเรียบร้อยแล้ว 💰',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                        updateApprovalSummary();
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'ผิดพลาด',
-                            text: res.message || 'ไม่สามารถบันทึกได้'
-                        });
-                    }
-                },
-                error: function(xhr) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'ผิดพลาด',
-                        text: 'ไม่สามารถบันทึกได้ (Status: ' + xhr.status + ')'
-                    });
-                }
-            });
-        }
-    });
+  confirmSave(`
+    <div class="text-start">
+        <p>🏠 <strong>วงเงินห้อง:</strong> ${numberFormat(roomAmount)} บาท</p>
+        <p>🛡️ <strong>วงเงินประกัน:</strong> ${numberFormat(insuranceAmount)} บาท</p>
+        <p>🪑 <strong>วงเงินเฟอร์นิเจอร์:</strong> ${numberFormat(furnitureAmount)} บาท</p>
+        <hr>
+        <p><strong>💰 วงเงินรวม:</strong> <span class="text-success">${numberFormat(totalAmount)} บาท</span></p>
+        ${contractDate ? "<p>📅 <strong>วันเซ็นสัญญา:</strong> " + contractDate + "</p>" : ""}
+        ${transferDate ? "<p>🏠 <strong>วันโอน:</strong> " + transferDate + "</p>" : ""}
+        ${note ? "<p>📝 <strong>หมายเหตุ:</strong> " + note + "</p>" : ""}
+    </div>
+  `, function() {
+    showLoading("กำลังบันทึก...");
+    $.post("../api/approval/save.php", JSON.stringify({
+      case_id: CASE_ID, total_amount: totalAmount, room_amount: roomAmount,
+      insurance_amount: insuranceAmount, furniture_amount: furnitureAmount,
+      contract_date: contractDate, transfer_date: transferDate, note: note
+    }), function(res) {
+      hideLoading();
+      if (res.success) { showSuccess("ข้อมูลการอนุมัติถูกบันทึกเรียบร้อยแล้ว 💰"); updateApprovalSummary(); }
+      else showError(res.message || "ไม่สามารถบันทึกได้");
+    }, "json").fail(function(xhr) { hideLoading(); showError("ไม่สามารถบันทึกได้ (Status: " + xhr.status + ")"); });
+  });
 }
 
 // ========== DEBT (with dynamic items) ==========
@@ -1455,7 +1031,6 @@ function calcDebtTotal() {
   $("#debtTotal").text(numberFormat(total));
 }
 
-// ✅ บันทึกการปิดหนี้ (SweetAlert2)
 function saveDebt() {
   let items = [];
   let hasError = false;
@@ -1463,108 +1038,31 @@ function saveDebt() {
   $(".debt-item").each(function () {
     let detail = $(this).find('input[id^="debt_detail_"]').val();
     let amount = $(this).find('input[id^="debt_amount_"]').val();
-
-    if (!detail || !amount) {
-      hasError = true;
-      return false;
-    }
-    items.push({
-      detail: detail,
-      amount: parseFloat(amount),
-    });
+    if (!detail || !amount) { hasError = true; return false; }
+    items.push({ detail: detail, amount: parseFloat(amount) });
   });
 
-  // ❌ ข้อมูลไม่ครบ
-  if (hasError || items.length === 0) {
-    Swal.fire({
-      icon: "warning",
-      title: "ข้อมูลไม่ครบถ้วน",
-      text: "กรุณากรอกรายละเอียดและจำนวนเงินให้ครบทุกรายการ",
-      toast: true,
-      position: "top-end",
-      timer: 3000,
-      showConfirmButton: false,
-    });
-    return;
-  }
+  if (hasError || items.length === 0) { showValidation("กรุณากรอกรายละเอียดและจำนวนเงินให้ครบทุกรายการ"); return; }
 
-  // คำนวณยอดรวม
-  let totalAmount = items.reduce(
-    (sum, item) => sum + parseFloat(item.amount || 0),
-    0,
-  );
+  let totalAmount = items.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
 
-  // ✅ Confirm
-  Swal.fire({
-    title: "บันทึกการปิดหนี้?",
-    html: `
-            <div class="text-start">
-                <p>📋 <strong>จำนวนรายการ:</strong> ${items.length} รายการ</p>
-                <p>💰 <strong>ยอดรวม:</strong> ${numberFormat(totalAmount)} บาท</p>
-                ${$("#debt_location").val() ? "<p>📍 <strong>สถานที่:</strong> " + $("#debt_location").val() + "</p>" : ""}
-                ${$("#debt_staff").val() ? "<p>👤 <strong>เจ้าหน้าที่:</strong> " + $("#debt_staff").val() + "</p>" : ""}
-            </div>
-        `,
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonColor: "#3085d6",
-    cancelButtonColor: "#6c757d",
-    confirmButtonText: '<i class="fas fa-save"></i> บันทึก',
-    cancelButtonText: "ยกเลิก",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // Loading
-      Swal.fire({
-        title: "กำลังบันทึก...",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-
-      let data = {
-        case_id: CASE_ID,
-        clear_date: $("#debt_date").val(),
-        location: $("#debt_location").val(),
-        staff_name: $("#debt_staff").val(),
-        note: $("#debt_note").val(),
-        items: items,
-      };
-
-      $.ajax({
-        url: "../api/debt/save.php",
-        type: "POST",
-        data: JSON.stringify(data),
-        contentType: "application/json",
-        dataType: "json",
-        timeout: 10000,
-        success: function (res) {
-          if (res.success) {
-            Swal.fire({
-              icon: "success",
-              title: "บันทึกสำเร็จ!",
-              text: "บันทึกการปิดหนี้เรียบร้อยแล้ว 💳",
-              timer: 2000,
-              showConfirmButton: false,
-            });
-            loadDebtHistory();
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: "ผิดพลาด",
-              text: res.message || "ไม่สามารถบันทึกได้",
-            });
-          }
-        },
-        error: function (xhr) {
-          Swal.fire({
-            icon: "error",
-            title: "ผิดพลาด",
-            text: "ไม่สามารถบันทึกได้ (Status: " + xhr.status + ")",
-          });
-        },
-      });
-    }
+  confirmSave(`
+    <div class="text-start">
+        <p>📋 <strong>จำนวนรายการ:</strong> ${items.length} รายการ</p>
+        <p>💰 <strong>ยอดรวม:</strong> ${numberFormat(totalAmount)} บาท</p>
+        ${$("#debt_location").val() ? "<p>📍 <strong>สถานที่:</strong> " + $("#debt_location").val() + "</p>" : ""}
+        ${$("#debt_staff").val() ? "<p>👤 <strong>เจ้าหน้าที่:</strong> " + $("#debt_staff").val() + "</p>" : ""}
+    </div>
+  `, function() {
+    showLoading("กำลังบันทึก...");
+    $.post("../api/debt/save.php", JSON.stringify({
+      case_id: CASE_ID, clear_date: $("#debt_date").val(), location: $("#debt_location").val(),
+      staff_name: $("#debt_staff").val(), note: $("#debt_note").val(), items: items
+    }), function(res) {
+      hideLoading();
+      if (res.success) { showSuccess("บันทึกการปิดหนี้เรียบร้อยแล้ว 💳"); loadDebtHistory(); }
+      else showError(res.message || "ไม่สามารถบันทึกได้");
+    }, "json").fail(function(xhr) { hideLoading(); showError("ไม่สามารถบันทึกได้ (Status: " + xhr.status + ")"); });
   });
 }
 
@@ -1593,110 +1091,31 @@ function loadMortgage() {
   );
 }
 
-// ✅ บันทึกการจำนอง (SweetAlert2)
 function saveMortgage() {
   let bankName = $("#mort_bank").val();
   let mortgageDate = $("#mort_date").val();
   let amount = $("#mort_amount").val();
 
-  // ❌ Validate
-  if (!bankName) {
-    Swal.fire({
-      icon: "warning",
-      title: "กรุณาเลือกธนาคาร",
-      toast: true,
-      position: "top-end",
-      timer: 2000,
-      showConfirmButton: false,
-    });
-    $("#mort_bank").focus();
-    return;
-  }
+  if (!bankName) { showValidation("กรุณาเลือกธนาคาร"); $("#mort_bank").focus(); return; }
+  if (!mortgageDate) { showValidation("กรุณาระบุวันที่จำนอง"); $("#mort_date").focus(); return; }
 
-  if (!mortgageDate) {
-    Swal.fire({
-      icon: "warning",
-      title: "กรุณาระบุวันที่จำนอง",
-      toast: true,
-      position: "top-end",
-      timer: 2000,
-      showConfirmButton: false,
-    });
-    $("#mort_date").focus();
-    return;
-  }
-
-  // ✅ Confirm
-  Swal.fire({
-    title: "บันทึกการจำนอง?",
-    html: `
-            <div class="text-start">
-                <p>🏦 <strong>ธนาคาร:</strong> ${bankName}</p>
-                <p>📅 <strong>วันที่:</strong> ${mortgageDate}</p>
-                ${amount ? "<p>💰 <strong>วงเงิน:</strong> " + numberFormat(amount) + " บาท</p>" : ""}
-                <p>🏠 <strong>บัญชี:</strong> ${$("#mort_account_number").val() || "-"}</p>
-            </div>
-        `,
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonColor: "#3085d6",
-    cancelButtonColor: "#6c757d",
-    confirmButtonText: '<i class="fas fa-save"></i> บันทึก',
-    cancelButtonText: "ยกเลิก",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // Loading
-      Swal.fire({
-        title: "กำลังบันทึก...",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-
-      let data = {
-        case_id: CASE_ID,
-        mortgage_date: mortgageDate,
-        bank_name: bankName,
-        account_name: $("#mort_account_name").val(),
-        account_number: $("#mort_account_number").val(),
-        approved_amount: amount || 0,
-      };
-
-      $.ajax({
-        url: "../api/mortgage/save.php",
-        type: "POST",
-        data: JSON.stringify(data),
-        contentType: "application/json",
-        dataType: "json",
-        timeout: 10000,
-        success: function (res) {
-          if (res.success) {
-            Swal.fire({
-              icon: "success",
-              title: "บันทึกสำเร็จ!",
-              text: "บันทึกการจำนองเรียบร้อยแล้ว 🏠",
-              timer: 2000,
-              showConfirmButton: false,
-            });
-            loadMortgageHistory();
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: "ผิดพลาด",
-              text: res.message || "ไม่สามารถบันทึกได้",
-            });
-          }
-        },
-        error: function (xhr) {
-          Swal.fire({
-            icon: "error",
-            title: "ผิดพลาด",
-            text: "ไม่สามารถบันทึกได้ (Status: " + xhr.status + ")",
-          });
-        },
-      });
-    }
+  confirmSave(`
+    <div class="text-start">
+        <p>🏦 <strong>ธนาคาร:</strong> ${bankName}</p>
+        <p>📅 <strong>วันที่:</strong> ${mortgageDate}</p>
+        ${amount ? "<p>💰 <strong>วงเงิน:</strong> " + numberFormat(amount) + " บาท</p>" : ""}
+        <p>🏠 <strong>บัญชี:</strong> ${$("#mort_account_number").val() || "-"}</p>
+    </div>
+  `, function() {
+    showLoading("กำลังบันทึก...");
+    $.post("../api/mortgage/save.php", JSON.stringify({
+      case_id: CASE_ID, mortgage_date: mortgageDate, bank_name: bankName,
+      account_name: $("#mort_account_name").val(), account_number: $("#mort_account_number").val(), approved_amount: amount || 0
+    }), function(res) {
+      hideLoading();
+      if (res.success) { showSuccess("บันทึกการจำนองเรียบร้อยแล้ว 🏠"); loadMortgageHistory(); }
+      else showError(res.message || "ไม่สามารถบันทึกได้");
+    }, "json").fail(function(xhr) { hideLoading(); showError("ไม่สามารถบันทึกได้ (Status: " + xhr.status + ")"); });
   });
 }
 
@@ -1740,49 +1159,21 @@ function showInspectionForm() {
   $("#inspectionModal").modal("show");
 }
 
-// พรีวิวรูปภาพก่อนอัปโหลด
 function previewInspectionImages() {
   let files = $("#inspection_photos")[0].files;
   let html = "";
 
-  if (files.length > 5) {
-    alert("อัปโหลดได้สูงสุด 5 รูป");
-    $("#inspection_photos").val("");
-    return;
-  }
+  if (files.length > 5) { showValidation("อัปโหลดได้สูงสุด 5 รูป"); $("#inspection_photos").val(""); return; }
 
   for (let i = 0; i < files.length; i++) {
     let file = files[i];
-
-    // ตรวจสอบประเภทไฟล์
-    if (!file.type.match("image.*")) {
-      alert("กรุณาเลือกไฟล์รูปภาพเท่านั้น");
-      continue;
-    }
-
-    // ตรวจสอบขนาด
-    if (file.size > 5 * 1024 * 1024) {
-      alert("ไฟล์ " + file.name + " มีขนาดเกิน 5MB");
-      continue;
-    }
+    if (!file.type.match("image.*")) { showValidation("กรุณาเลือกไฟล์รูปภาพเท่านั้น"); continue; }
+    if (file.size > 5 * 1024 * 1024) { showValidation("ไฟล์ " + file.name + " มีขนาดเกิน 5MB"); continue; }
 
     let reader = new FileReader();
     reader.onload = (function (f) {
       return function (e) {
-        html +=
-          '<div class="col-md-4 col-sm-6 mb-2">' +
-          '<div class="position-relative">' +
-          '<img src="' +
-          e.target.result +
-          '" class="img-thumbnail" style="height: 120px; width: 100%; object-fit: cover;">' +
-          '<span class="position-absolute top-0 end-0 badge bg-primary m-1">' +
-          (i + 1) +
-          "</span>" +
-          '<small class="d-block text-truncate">' +
-          f.name +
-          "</small>" +
-          "</div>" +
-          "</div>";
+        html += `<div class="col-md-4 col-sm-6 mb-2"><div class="position-relative"><img src="${e.target.result}" class="img-thumbnail" style="height:120px;width:100%;object-fit:cover;"><span class="position-absolute top-0 end-0 badge bg-primary m-1">${i+1}</span><small class="d-block text-truncate">${f.name}</small></div></div>`;
         $("#imagePreview").html(html);
       };
     })(file);
@@ -1790,113 +1181,45 @@ function previewInspectionImages() {
   }
 }
 
-// ✅ บันทึกผลตรวจห้อง (SweetAlert2)
 function saveInspection() {
   let round = $("#inspection_round").val();
   let date = $("#inspection_date").val();
   let status = $("#inspection_status").val();
   let note = $("#inspection_note").val().trim();
 
-  // ❌ Validate
-  if (!date) {
-    Swal.fire({
-      icon: "warning",
-      title: "กรุณาระบุวันที่ตรวจ",
-      toast: true,
-      position: "top-end",
-      timer: 2000,
-      showConfirmButton: false,
-    });
-    $("#inspection_date").focus();
-    return;
-  }
+  if (!date) { showValidation("กรุณาระบุวันที่ตรวจ"); $("#inspection_date").focus(); return; }
 
-  // ✅ Confirm
   let statusLabel = status === "pass" ? "✅ ผ่าน" : "❌ ไม่ผ่าน (พบ defect)";
   let photoCount = $("#inspection_photos")[0].files.length;
 
-  Swal.fire({
-    title: "บันทึกผลตรวจห้อง?",
-    html: `
-            <div class="text-start">
-                <p>🔍 <strong>ครั้งที่:</strong> ${round}</p>
-                <p>📅 <strong>วันที่:</strong> ${date}</p>
-                <p>📊 <strong>สถานะ:</strong> ${statusLabel}</p>
-                ${note ? "<p>📝 <strong>หมายเหตุ:</strong> " + note + "</p>" : ""}
-                ${photoCount > 0 ? "<p>📸 <strong>รูปภาพ:</strong> " + photoCount + " รูป</p>" : ""}
-            </div>
-        `,
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonColor: "#3085d6",
-    cancelButtonColor: "#6c757d",
-    confirmButtonText: '<i class="fas fa-save"></i> บันทึก',
-    cancelButtonText: "ยกเลิก",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // Loading
-      Swal.fire({
-        title: "กำลังบันทึก...",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
+  confirmSave(`
+    <div class="text-start">
+        <p>🔍 <strong>ครั้งที่:</strong> ${round}</p>
+        <p>📅 <strong>วันที่:</strong> ${date}</p>
+        <p>📊 <strong>สถานะ:</strong> ${statusLabel}</p>
+        ${note ? "<p>📝 <strong>หมายเหตุ:</strong> " + note + "</p>" : ""}
+        ${photoCount > 0 ? "<p>📸 <strong>รูปภาพ:</strong> " + photoCount + " รูป</p>" : ""}
+    </div>
+  `, function() {
+    showLoading("กำลังบันทึก...");
+    let formData = new FormData();
+    formData.append("case_id", CASE_ID);
+    formData.append("round", round);
+    formData.append("inspect_date", date);
+    formData.append("status", status);
+    formData.append("note", note);
+    let files = $("#inspection_photos")[0].files;
+    for (let i = 0; i < files.length; i++) { formData.append("photos[]", files[i]); }
 
-      // สร้าง FormData (รองรับรูปภาพ)
-      let formData = new FormData();
-      formData.append("case_id", CASE_ID);
-      formData.append("round", round);
-      formData.append("inspect_date", date);
-      formData.append("status", status);
-      formData.append("note", note);
-
-      // เพิ่มรูปภาพ
-      let files = $("#inspection_photos")[0].files;
-      for (let i = 0; i < files.length; i++) {
-        formData.append("photos[]", files[i]);
-      }
-
-      $.ajax({
-        url: "../api/inspection/save.php",
-        type: "POST",
-        data: formData,
-        processData: false,
-        contentType: false,
-        dataType: "json",
-        timeout: 30000,
-        success: function (res) {
-          if (res.success) {
-            Swal.fire({
-              icon: "success",
-              title: "บันทึกสำเร็จ!",
-              text: "บันทึกผลตรวจห้องครั้งที่ " + round + " เรียบร้อยแล้ว 🔍",
-              timer: 2000,
-              showConfirmButton: false,
-            });
-            // ล้างฟอร์ม
-            $("#inspection_note").val("");
-            $("#inspection_photos").val("");
-            $("#imagePreview").html("");
-            // โหลดรายการใหม่
-            loadInspectionList();
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: "ผิดพลาด",
-              text: res.message || "ไม่สามารถบันทึกได้",
-            });
-          }
-        },
-        error: function (xhr) {
-          Swal.fire({
-            icon: "error",
-            title: "ผิดพลาด",
-            text: "ไม่สามารถบันทึกได้ (Status: " + xhr.status + ")",
-          });
-        },
-      });
-    }
+    $.ajax({
+      url: "../api/inspection/save.php", type: "POST", data: formData, processData: false, contentType: false, dataType: "json", timeout: 30000,
+      success: function(res) {
+        hideLoading();
+        if (res.success) { showSuccess("บันทึกผลตรวจห้องครั้งที่ " + round + " เรียบร้อยแล้ว 🔍"); $("#inspection_note").val(""); $("#inspection_photos").val(""); $("#imagePreview").html(""); loadInspectionList(); }
+        else showError(res.message || "ไม่สามารถบันทึกได้");
+      },
+      error: function(xhr) { hideLoading(); showError("ไม่สามารถบันทึกได้ (Status: " + xhr.status + ")"); }
+    });
   });
 }
 
@@ -2074,12 +1397,4 @@ function formatDate(d) {
   } catch (e) {
     return d;
   }
-}
-
-function numberFormat(n) {
-  if (!n && n !== 0) return "0";
-  return new Intl.NumberFormat("th-TH", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(parseFloat(n));
 }

@@ -55,7 +55,7 @@ function loadDashboardStats() {
         type: 'GET',
         dataType: 'json',
         success: function(response) {
-            console.log('Stats Response:', response); // Debug
+            //console.log('Stats Response:', response); // Debug
             
             if(response.success && response.data) {
                 const stats = response.data;
@@ -79,11 +79,11 @@ function loadDashboardStats() {
                 // Color coding for approval rate
                 updateApprovalRateColor(stats.approval_rate);
             } else {
-                console.error('Invalid stats response:', response);
+                //console.error('Invalid stats response:', response);
             }
         },
         error: function(xhr, status, error) {
-            console.error('Stats API Error:', error);
+            //console.error('Stats API Error:', error);
         }
     });
 }
@@ -140,7 +140,7 @@ function loadCaseChart() {
         data: { year: year },
         dataType: 'json',
         success: function(response) {
-            console.log('Case Chart Response:', response); // Debug
+            //console.log('Case Chart Response:', response); // Debug
             
             if(response.success && response.data) {
                 const data = response.data;
@@ -153,7 +153,7 @@ function loadCaseChart() {
                 
                 const ctx = document.getElementById('caseStatusChart');
                 if(!ctx) {
-                    console.error('Canvas element not found: caseStatusChart');
+                    //console.error('Canvas element not found: caseStatusChart');
                     return;
                 }
                 
@@ -243,12 +243,12 @@ function loadCaseChart() {
                     }
                 });
             } else {
-                console.error('Invalid chart data:', response);
+                //console.error('Invalid chart data:', response);
                 showChartError('caseStatusChart');
             }
         },
         error: function(xhr, status, error) {
-            console.error('Chart API Error:', error);
+            //console.error('Chart API Error:', error);
             showChartError('caseStatusChart');
         }
     });
@@ -260,7 +260,7 @@ function loadKpiChart() {
         type: 'GET',
         dataType: 'json',
         success: function(response) {
-            console.log('KPI Chart Response:', response); // Debug
+            //console.log('KPI Chart Response:', response); // Debug
             
             if(response.success && response.data) {
                 const data = response.data;
@@ -273,7 +273,7 @@ function loadKpiChart() {
                 
                 const ctx = document.getElementById('kpiChart');
                 if(!ctx) {
-                    console.error('Canvas element not found: kpiChart');
+                    //console.error('Canvas element not found: kpiChart');
                     return;
                 }
                 
@@ -340,7 +340,7 @@ function loadKpiChart() {
                     }
                 });
             } else {
-                console.error('Invalid KPI data:', response);
+                //console.error('Invalid KPI data:', response);
                 showChartError('kpiChart');
             }
         },
