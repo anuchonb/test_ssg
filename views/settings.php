@@ -216,65 +216,36 @@ if (!checkRole('admin')) {
                         </div>
                     </div>
 
-                    <!-- ============ TAB 3: LINE Notify ============ -->
+                    <!-- Tab LINE -->
                     <div class="tab-pane fade" id="tab-line">
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h5 class="mb-0"><i class="fab fa-line"></i> ตั้งค่า LINE Notify</h5>
-                            </div>
+                        <div class="card">
+                            <div class="card-header"><h5>📱 ตั้งค่า LINE Login</h5></div>
                             <div class="card-body">
                                 <div class="alert alert-info">
-                                    <i class="fas fa-info-circle"></i>
-                                    <strong>วิธีใช้งาน LINE Notify:</strong><br>
-                                    1. เข้าไปที่ <a href="https://notify-bot.line.me/th/" target="_blank">LINE Notify</a><br>
-                                    2. กด "สร้าง Token" และเลือกกลุ่มที่ต้องการส่งข้อความ<br>
-                                    3. คัดลอก Token มาใส่ในช่องด้านล่าง
+                                    <strong>🔗 การตั้งค่า Callback URL:</strong><br>
+                                    ใช้ URL: <code><?php echo $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']) . '/api/line/callback.php'; ?></code>
                                 </div>
-
-                                <form id="lineSettingsForm">
-                                    <div class="mb-3">
-                                        <label class="form-label">LINE Notify Token</label>
-                                        <input type="text" class="form-control" id="line_token"
-                                            placeholder="กรอก LINE Notify Token" style="font-family: monospace;">
-                                        <div class="form-text">Token จะถูกเก็บอย่างปลอดภัย</div>
-                                    </div>
-
-                                    
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <button type="button" class="btn btn-success" onclick="testLineNotify()">
-                                                <i class="fab fa-line"></i> ทดสอบส่งข้อความ
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">การแจ้งเตือนที่ส่งผ่าน LINE</label>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="line_new_case">
-                                            <label class="form-check-label" for="line_new_case">แจ้งเตือนเมื่อมีเคสใหม่</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="line_approval" checked>
-                                            <label class="form-check-label" for="line_approval">แจ้งเตือนผลอนุมัติ</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="line_transfer" checked>
-                                            <label class="form-check-label" for="line_transfer">แจ้งเตือนวันโอน</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="line_daily_report">
-                                            <label class="form-check-label" for="line_daily_report">ส่งสรุปประจำวัน (18:00 น.)</label>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-md-6">
-                                            <button type="button" class="btn btn-primary" onclick="saveAllSettings()">
-                                                <i class="fas fa-save"></i> บันทึกการตั้งค่าทั้งหมด
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Channel ID</label>
+                                    <input type="text" class="form-control" id="line_channel_id" placeholder="1234567890">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Channel Secret</label>
+                                    <input type="password" class="form-control" id="line_channel_secret" placeholder="xxxxxxxxxxxx">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Callback URL</label>
+                                    <input type="text" class="form-control" id="line_callback_url" 
+                                        placeholder="https://your-domain.com/api/line/callback.php">
+                                </div>
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="line_login_enabled">
+                                    <label class="form-check-label">เปิดใช้งาน LINE Login</label>
+                                </div>
+                                <button type="button" class="btn btn-primary" onclick="saveAllSettings()">
+                                    <i class="fas fa-save"></i> บันทึกการตั้งค่าทั้งหมด
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -511,6 +482,12 @@ if (!checkRole('admin')) {
                 $('#system_new_case').prop('checked', s.system_new_case == '1');
                 $('#system_follow_reminder').prop('checked', s.system_follow_reminder == '1');
 
+                 // ✅ ============ LINE Login (เพิ่มใหม่) ============
+                $('#line_channel_id').val(s.line_channel_id || '');
+                $('#line_channel_secret').val(s.line_channel_secret || '');
+                $('#line_callback_url').val(s.line_callback_url || '');
+                $('#line_login_enabled').prop('checked', s.line_login_enabled == '1');
+
                 // Tab LINE
                 $('#line_token').val(s.line_token || '');
                 $('#line_new_case').prop('checked', s.line_new_case == '1');
@@ -538,6 +515,12 @@ if (!checkRole('admin')) {
             enable_register: $('#enable_register').is(':checked') ? '1' : '0',
             enable_maintenance: $('#enable_maintenance').is(':checked') ? '1' : '0',
 
+            // ✅ LINE Login (เพิ่มใหม่)
+            line_channel_id: $('#line_channel_id').val(),
+            line_channel_secret: $('#line_channel_secret').val(),
+            line_callback_url: $('#line_callback_url').val(),
+            line_login_enabled: $('#line_login_enabled').is(':checked') ? '1' : '0',
+
             // การแจ้งเตือน
             email_new_case: $('#email_new_case').is(':checked') ? '1' : '0',
             email_kpi_fail: $('#email_kpi_fail').is(':checked') ? '1' : '0',
@@ -546,64 +529,18 @@ if (!checkRole('admin')) {
             system_new_case: $('#system_new_case').is(':checked') ? '1' : '0',
             system_follow_reminder: $('#system_follow_reminder').is(':checked') ? '1' : '0',
 
-            // LINE
+            // LINE Notify
             line_token: $('#line_token').val(),
             line_new_case: $('#line_new_case').is(':checked') ? '1' : '0',
             line_approval: $('#line_approval').is(':checked') ? '1' : '0',
             line_transfer: $('#line_transfer').is(':checked') ? '1' : '0',
-            line_daily_report: $('#line_daily_report').is(':checked') ? '1' : '0'
+            line_daily_report: $('#line_daily_report').is(':checked') ? '1' : '0',
         };
 
-        Swal.fire({
-            title: 'บันทึกการตั้งค่า?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: '<i class="fas fa-save"></i> บันทึก',
-            cancelButtonText: 'ยกเลิก'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire({
-                    title: 'กำลังบันทึก...',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-
-                $.ajax({
-                    url: '../api/settings/save_settings.php',
-                    type: 'POST',
-                    data: JSON.stringify(data),
-                    contentType: 'application/json',
-                    dataType: 'json',
-                    timeout: 10000,
-                    success: function(res) {
-                        if (res.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'บันทึกสำเร็จ!',
-                                text: 'การตั้งค่าถูกบันทึกเรียบร้อย',
-                                timer: 2000,
-                                showConfirmButton: false
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'ผิดพลาด',
-                                text: res.message || ''
-                            });
-                        }
-                    },
-                    error: function(xhr) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'ผิดพลาด',
-                            text: 'Status: ' + xhr.status
-                        });
-                    }
-                });
-            }
-        });
+        $.post('../api/settings/save_settings.php', JSON.stringify(data), function(res) {
+            if (res.success) showSuccess('บันทึกการตั้งค่าเรียบร้อย');
+            else showError(res.message);
+        }, 'json');
     }
 
     // ============ GENERAL SETTINGS ============
@@ -670,20 +607,6 @@ if (!checkRole('admin')) {
             },
             error: function() {
                 Swal.fire('ผิดพลาด!', 'ไม่สามารถเชื่อมต่อ LINE Notify ได้', 'error');
-            }
-        });
-    }
-
-    function saveLineSettings() {
-        Swal.fire({
-            title: 'บันทึกการตั้งค่า LINE?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'บันทึก',
-            cancelButtonText: 'ยกเลิก'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                showToast('บันทึกการตั้งค่า LINE เรียบร้อย', 'success');
             }
         });
     }

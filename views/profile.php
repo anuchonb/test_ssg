@@ -83,6 +83,46 @@ $user_role = $_SESSION['user_role'];
                                 <?php echo date('d/m/Y H:i:s', $_SESSION['login_time'] ?? time()); ?>
                             </p>
                         </div>
+                        <!-- ใน views/profile.php -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0"><i class="fab fa-line"></i> เชื่อมต่อ LINE</h6>
+                            </div>
+                            <div class="card-body">
+                                <?php
+                                    include_once __DIR__.'../../config/database.php';
+
+                                    $database = new Database();
+                                    $db = $database->getConnection();
+                                    
+                                    $stmt = $db->prepare("SELECT line_user_id, line_display_name, line_connected_at FROM users WHERE id = ?");
+                                    $stmt->execute([$_SESSION['user_id']]);
+                                    $line_info = $stmt->fetch();
+                                ?>
+
+                                <?php if ($line_info && $line_info['line_user_id']): ?>
+                                    <!-- ✅ เชื่อมต่อแล้ว -->
+                                    <div class="alert alert-success">
+                                        <i class="fab fa-line"></i> 
+                                        <strong>เชื่อมต่อแล้ว!</strong><br>
+                                        LINE: <?php echo htmlspecialchars($line_info['line_display_name']); ?><br>
+                                        <small>เชื่อมต่อเมื่อ: <?php echo $line_info['line_connected_at']; ?></small>
+                                    </div>
+                                    <button class="btn btn-outline-danger btn-sm" onclick="disconnectLine()">
+                                        ยกเลิกการเชื่อมต่อ
+                                    </button>
+                                <?php else: ?>
+                                    <!-- ❌ ยังไม่เชื่อมต่อ -->
+                                    <div class="alert alert-warning">
+                                        🔴 ยังไม่ได้เชื่อมต่อ LINE<br>
+                                        <small>เชื่อมต่อเพื่อรับการแจ้งเตือน</small>
+                                    </div>
+                                    <button class="btn btn-success" onclick="connectLine()">
+                                        <i class="fab fa-line"></i> เชื่อมต่อ LINE
+                                    </button>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 

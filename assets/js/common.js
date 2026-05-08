@@ -33,6 +33,23 @@ $.ajaxSetup({
     }
 });
 
+function connectLine() {
+    // เปิดหน้าต่าง LINE Login
+    let width = 500, height = 600;
+    let left = (screen.width - width) / 2;
+    let top = (screen.height - height) / 2;
+    window.open('../api/line/login.php', 'LINE Login', `width=${width},height=${height},left=${left},top=${top}`);
+}
+
+function disconnectLine() {
+    confirmDelete('ยกเลิกการเชื่อมต่อ LINE?', function() {
+        $.post('../api/line/disconnect.php', function(res) {
+            if (res.success) { showSuccess('ยกเลิกแล้ว!'); location.reload(); }
+            else showError(res.message);
+        }, 'json');
+    });
+}
+
 function showGlobalLoading(message = 'กำลังโหลด...') {
     Swal.fire({
         title: message,

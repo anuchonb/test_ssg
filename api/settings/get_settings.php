@@ -28,32 +28,50 @@ try {
         }
     }
 
-    // ถ้าไม่มีข้อมูลให้ใช้ค่าเริ่มต้น
-    if (empty($settings)) {
-        $settings = [
-            'system_name' => 'CRM Condo System',
-            'company_name' => '',
-            'language' => 'th',
-            'timezone' => 'Asia/Bangkok',
-            'items_per_page' => '25',
-            'date_format' => 'd/m/Y',
-            'currency_format' => 'thb',
-            'enable_register' => '1',
-            'enable_maintenance' => '0',
-            'line_token' => '',
-            'email_new_case' => '1',
-            'email_kpi_fail' => '1',
-            'email_approval' => '1',
-            'line_new_case' => '0',
-            'line_approval' => '1',
-            'line_daily_report' => '0'
-        ];
+    // ✅ ค่าเริ่มต้น (ถ้าไม่มีใน DB)
+    $defaults = [
+        'system_name'          => 'CRM Condo System',
+        'company_name'         => '',
+        'language'             => 'th',
+        'timezone'             => 'Asia/Bangkok',
+        'items_per_page'       => '25',
+        'date_format'          => 'd/m/Y',
+        'currency_format'      => 'thb',
+        'enable_register'      => '1',
+        'enable_maintenance'   => '0',
+        'line_channel_id'      => '',
+        'line_channel_secret'  => '',
+        'line_callback_url'    => '',
+        'line_login_enabled'   => '0',
+        'line_token'           => '',
+        'email_new_case'       => '1',
+        'email_kpi_fail'       => '1',
+        'email_approval'       => '1',
+        'email_transfer'       => '1',
+        'system_new_case'      => '1',
+        'system_follow_reminder' => '1',
+        'line_new_case'        => '0',
+        'line_approval'        => '1',
+        'line_transfer'        => '1',
+        'line_daily_report'    => '0'
+    ];
+
+    foreach ($defaults as $key => $value) {
+        if (!isset($settings[$key])) {
+            $settings[$key] = $value;
+        }
     }
 
-    echo json_encode(["success" => true, "data" => $settings], JSON_UNESCAPED_UNICODE);
+    echo json_encode([
+        "success" => true,
+        "data" => $settings
+    ], JSON_UNESCAPED_UNICODE);
 
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(["success" => false, "message" => $e->getMessage()]);
+    echo json_encode([
+        "success" => false,
+        "message" => $e->getMessage()
+    ]);
 }
 ?>

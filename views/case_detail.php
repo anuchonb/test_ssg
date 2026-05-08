@@ -267,7 +267,7 @@ if (!$case_id) {
                     <div class="mb-3"><label class="form-label">รายละเอียด</label><textarea class="form-control" id="follow_note" rows="4" placeholder="บันทึกการติดตาม..."></textarea></div>
                 </form>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button><button type="button" class="btn btn-primary" onclick="saveFollow()">บันทึก</button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button><button type="button" class="btn btn-primary" onclick="saveFollow()">บันทึกการติดตาม</button></div>
         </div>
     </div>
 </div>
