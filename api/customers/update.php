@@ -14,7 +14,8 @@ $data = json_decode(file_get_contents("php://input"));
 
 if(!empty($data->id)) {
     try {
-        $query = "UPDATE customers SET 
+        $query = "
+        UPDATE customers SET 
             name = :name,
             phone = :phone,
             facebook = :facebook,
@@ -31,7 +32,7 @@ if(!empty($data->id)) {
             work_age_month = :work_age_month,
             welfare = :welfare,
             debt_status = :debt_status
-            WHERE id = :id";
+        WHERE id = :id";
         
         $stmt = $db->prepare($query);
         $stmt->bindParam(":name", $data->name);

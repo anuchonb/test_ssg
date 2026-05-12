@@ -50,14 +50,15 @@ try {
     $offset = ($page - 1) * $per_page;
 
     // ✅ SELECT - ใช้ Subquery ป้องกันลูกค้าซ้ำ
-    $query = "SELECT c.*, p.name as project_name,
-              (SELECT cs.id FROM cases cs WHERE cs.customer_id = c.id LIMIT 1) as case_id,
-              (SELECT cs.status FROM cases cs WHERE cs.customer_id = c.id LIMIT 1) as case_status
-              FROM customers c
-              LEFT JOIN projects p ON c.project_id = p.id
-              {$whereClause}
-              ORDER BY c.created_at DESC 
-              LIMIT {$offset}, {$per_page}";
+    $query = "
+        SELECT c.*, p.name as project_name,
+            (SELECT cs.id FROM cases cs WHERE cs.customer_id = c.id LIMIT 1) as case_id,
+            (SELECT cs.status FROM cases cs WHERE cs.customer_id = c.id LIMIT 1) as case_status
+        FROM customers c
+        LEFT JOIN projects p ON c.project_id = p.id
+            {$whereClause}
+        ORDER BY c.created_at DESC 
+        LIMIT {$offset}, {$per_page}";
 
     $stmt = $db->prepare($query);
     $stmt->execute($params);
