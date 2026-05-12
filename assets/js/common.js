@@ -1,11 +1,52 @@
-// ========== AJAX SETUP ==========
+function initFlatpickr() {
+    if (typeof flatpickr === 'undefined') return;
+    
+    // ✅ Date Picker
+    flatpickr("input[type=date]", {
+        dateFormat: "d/m/Y",
+        locale: "th",
+        allowInput: true,
+        disableMobile: true,
+        prevArrow: '<i class="fas fa-chevron-left"></i>',
+        nextArrow: '<i class="fas fa-chevron-right"></i>'
+    });
+
+    flatpickr("input[type=datetime-local]", {
+        enableTime: true,
+        dateFormat: "d/m/Y H:i",
+        locale: "th",
+        allowInput: true,
+        disableMobile: true,
+        time_24hr: true,
+        prevArrow: '<i class="fas fa-chevron-left"></i>',
+        nextArrow: '<i class="fas fa-chevron-right"></i>'
+    });
+
+    flatpickr("#filterDateFrom", {
+        dateFormat: "d/m/Y",
+        locale: "th"
+    });
+
+    flatpickr("#bank_date", {
+        dateFormat: "d/m/Y",
+        locale: "th",
+        defaultDate: "today"
+    });
+
+    flatpickr("#inspection_date", {
+        enableTime: true,
+        dateFormat: "d/m/Y H:i",
+        locale: "th"
+    });
+    
+}
+
 $.ajaxSetup({
     headers: {
         'X-Requested-With': 'XMLHttpRequest'
     },
-    timeout: 30000, // 30 seconds timeout
+    timeout: 30000,
     error: function(xhr, status, error) {
-        // Handle 401 Unauthorized
         if(xhr.status === 401) {
             Swal.fire({
                 icon: 'warning',
@@ -17,7 +58,6 @@ $.ajaxSetup({
                 window.location.href = '../index.php?session=expired';
             });
         }
-        // Handle 403 Forbidden
         else if(xhr.status === 403) {
             Swal.fire({
                 icon: 'error',
@@ -26,7 +66,6 @@ $.ajaxSetup({
                 confirmButtonText: 'ตกลง'
             });
         }
-        // Handle 500 Server Error
         else if(xhr.status === 500) {
             console.error('Server Error:', xhr.responseText);
         }
@@ -34,7 +73,6 @@ $.ajaxSetup({
 });
 
 function connectLine() {
-    // เปิดหน้าต่าง LINE Login
     let width = 500, height = 600;
     let left = (screen.width - width) / 2;
     let top = (screen.height - height) / 2;
@@ -192,19 +230,12 @@ function formatDateThai(dateString, format = 'short') {
     return date.toLocaleDateString('th-TH', options);
 }
 
-/**
- * แสดงเวลาผ่านไปแล้ว
- */
 function timeAgo(dateString) {
     if(!dateString) return '-';
     
     moment.locale('th');
     return moment(dateString).fromNow();
 }
-
-/**
- * Escape HTML
- */
 function escapeHtml(text) {
     if(!text) return '';
     const div = document.createElement('div');
@@ -212,19 +243,11 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-/**
- * ตัดข้อความยาว
- */
 function truncateText(text, maxLength = 50) {
     if(!text) return '-';
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
 }
 
-// ========== UTILITY FUNCTIONS ==========
-
-/**
- * Copy to Clipboard
- */
 function copyToClipboard(text, showAlert = true) {
     if(navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(text).then(() => {
@@ -261,9 +284,6 @@ function fallbackCopy(text, showAlert) {
     document.body.removeChild(textarea);
 }
 
-/**
- * Serialize Form to JSON
- */
 function formToJSON(formElement) {
     const formData = new FormData(formElement);
     const data = {};
@@ -283,9 +303,6 @@ function formToJSON(formElement) {
     return data;
 }
 
-/**
- * Debounce Function
- */
 function debounce(func, wait = 300) {
     let timeout;
     return function executedFunction(...args) {
@@ -298,43 +315,24 @@ function debounce(func, wait = 300) {
     };
 }
 
-/**
- * Get URL Parameter
- */
 function getUrlParameter(name) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(name);
 }
 
-// ========== FORM VALIDATION ==========
-
-/**
- * Validate Email
- */
 function isValidEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-/**
- * Validate Thai Phone Number
- */
 function isValidPhone(phone) {
     const cleaned = phone.replace(/[^0-9]/g, '');
     return cleaned.length >= 9 && cleaned.length <= 10 && cleaned.startsWith('0');
 }
 
-/**
- * Validate Required Field
- */
 function isRequired(value) {
     return value !== null && value !== undefined && value.toString().trim() !== '';
 }
 
-// ========== UI HELPERS ==========
-
-/**
- * Toggle Password Visibility
- */
 function togglePassword(inputId, iconId) {
     const input = document.getElementById(inputId);
     const icon = document.getElementById(iconId);
@@ -350,9 +348,6 @@ function togglePassword(inputId, iconId) {
     }
 }
 
-/**
- * Scroll to Element
- */
 function scrollToElement(elementId, offset = 0) {
     const element = document.getElementById(elementId);
     if(element) {
@@ -361,16 +356,10 @@ function scrollToElement(elementId, offset = 0) {
     }
 }
 
-/**
- * Scroll to Top
- */
 function scrollToTop() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ========== SESSION MANAGEMENT ==========
-
-// Auto logout timer (30 minutes)
 let logoutTimer;
 const LOGOUT_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
@@ -402,11 +391,9 @@ function resetLogoutTimer() {
     }, LOGOUT_TIMEOUT);
 }
 
-// Start timer and reset on user activity
 $(document).ready(function() {
     resetLogoutTimer();
-    
-    // Reset timer on user activity
+     initFlatpickr();
     ['click', 'keypress', 'scroll', 'mousemove'].forEach(event => {
         document.addEventListener(event, () => {
             resetLogoutTimer();
@@ -414,7 +401,6 @@ $(document).ready(function() {
     });
 });
 
-// ========== NOTIFICATION CHECKER ==========
 function checkNotifications() {
     $.ajax({
         url: API_URL + 'dashboard/sidebar_stats.php',
@@ -442,11 +428,9 @@ function updateNotificationBadges(data) {
     }
 }
 
-// Check notifications every 30 seconds
 setInterval(checkNotifications, 30000);
 checkNotifications();
 
-// ========== SERVER TIME ==========
 function updateServerTime() {
     const now = new Date();
     const options = { 
@@ -461,29 +445,24 @@ function updateServerTime() {
 updateServerTime();
 setInterval(updateServerTime, 1000);
 
-// ========== PAGE LOAD COMPLETE ==========
 $(document).ready(function() {
     console.log('CRM Condo System v1.0 - Page Loaded');
     console.log('Page:', CURRENT_PAGE);
     console.log('Time:', new Date().toLocaleString('th-TH'));
     
-    // Initialize Bootstrap tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
     
-    // Initialize Bootstrap popovers
     var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
     popoverTriggerList.map(function (popoverTriggerEl) {
         return new bootstrap.Popover(popoverTriggerEl);
     });
     
-    // Remove loading overlay if exists
     $('#loadingOverlay').fadeOut(300);
 });
 
-// ========== KEYBOARD SHORTCUTS ==========
 $(document).keydown(function(e) {
     // Ctrl + Shift + L: Logout
     if(e.ctrlKey && e.shiftKey && e.key === 'L') {
@@ -493,19 +472,16 @@ $(document).keydown(function(e) {
         });
     }
     
-    // Escape: Close all modals
     if(e.key === 'Escape') {
         $('.modal').modal('hide');
         Swal.close();
     }
     
-    // Ctrl + Home: Go to Dashboard
     if(e.ctrlKey && e.key === 'Home') {
         e.preventDefault();
         window.location.href = 'dashboard.php';
     }
     
-    // F5 or Ctrl + R: Prevent accidental refresh with unsaved data
     if((e.key === 'F5' || (e.ctrlKey && e.key === 'r')) && window.hasUnsavedChanges) {
         e.preventDefault();
         confirmAction('มีข้อมูลที่ยังไม่ได้บันทึก', 'คุณต้องการออกจากหน้านี้ใช่หรือไม่?', function() {
@@ -515,7 +491,6 @@ $(document).keydown(function(e) {
     }
 });
 
-// ========== PREVENT ACCIDENTAL NAVIGATION ==========
 window.addEventListener('beforeunload', function(e) {
     if(window.hasUnsavedChanges) {
         e.preventDefault();
@@ -524,12 +499,10 @@ window.addEventListener('beforeunload', function(e) {
     }
 });
 
-// ========== PRINT FUNCTION ==========
 function printPage() {
     window.print();
 }
 
-// ========== FULLSCREEN TOGGLE ==========
 function toggleFullscreen() {
     if(!document.fullscreenElement) {
         document.documentElement.requestFullscreen().catch(err => {
@@ -540,12 +513,10 @@ function toggleFullscreen() {
     }
 }
 
-// ========== CONSOLE WARNING ==========
 console.log('%c⚠️ คำเตือนเพื่อความปลอดภัย', 'color: red; font-size: 20px; font-weight: bold;');
 console.log('%cนี่เป็นฟีเจอร์สำหรับนักพัฒนา หากมีคนบอกให้คุณคัดลอก/วางข้อความที่นี่ อาจเป็นการหลอกลวงเพื่อขโมยข้อมูลได้', 'font-size: 14px;');
 console.log('%cห้ามใส่รหัสผ่านหรือข้อมูลสำคัญในช่องนี้เด็ดขาด', 'color: orange; font-size: 14px;');
 
-// ========== ERROR HANDLING ==========
 window.onerror = function(message, source, lineno, colno, error) {
     console.error('JavaScript Error:', {
         message: message,
@@ -554,14 +525,10 @@ window.onerror = function(message, source, lineno, colno, error) {
         column: colno,
         error: error
     });
-    
-    // ซ่อน error จากผู้ใช้ในการใช้งานจริง
     return true;
 };
 
-// ========== AJAX ERROR HANDLER ==========
 $(document).ajaxError(function(event, jqxhr, settings, thrownError) {
-    // จัดการ error ทั่วไป (ยกเว้นที่จัดการเฉพาะแล้ว)
     if(jqxhr.status === 0) {
         console.error('Network Error: ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
     } else if(jqxhr.status >= 500) {

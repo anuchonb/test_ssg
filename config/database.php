@@ -1,15 +1,11 @@
 <?php
-// config/database.php
 class Database {
-    private $host = "127.0.0.1";
+    private $host = "localhost";
     private $db_name = "test_ssg_db";
     private $username = "root";
-    private $password = "";
+    private $password = "12345678";
     private $conn;
 
-    /**
-     * Get database connection
-     */
     public function getConnection() {
         $this->conn = null;
         
@@ -28,10 +24,7 @@ class Database {
                 )
             );
         } catch(PDOException $e) {
-            // Log error (don't expose details in production)
-            error_log("Database Connection Error: " . $e->getMessage());
-            
-            // Return error response
+            //error_log("Database Connection Error: " . $e->getMessage());
             header('Content-Type: application/json');
             http_response_code(500);
             echo json_encode([
@@ -45,15 +38,11 @@ class Database {
     }
 }
 
-/**
- * Helper function to get database instance
- */
 function getDB() {
     $database = new Database();
     return $database->getConnection();
 }
 
-// ปิดแสดง error
-// ini_set('display_errors', 0);
-// error_reporting(0);
+ini_set('display_errors', 0);
+error_reporting(0);
 ?>

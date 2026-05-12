@@ -506,4 +506,3 @@ INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `created_at`) VA
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `created_at`) VALUES ('4', 'คุณมานะ Support', 'mana@company.com', '123456', 'support', '2026-01-01 07:00:00');
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `created_at`) VALUES ('5', 'คุณสุพจน์ Support 2', 'supoj@company.com', '123456', 'support', '2026-01-01 07:00:00');
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `created_at`) VALUES ('6', 'Admin ใหญ่', 'admin@company.com', 'admin123', 'admin', '2026-01-01 07:00:00');
-

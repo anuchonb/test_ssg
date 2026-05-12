@@ -11,12 +11,14 @@ $db = $database->getConnection();
 $case_id = isset($_GET['case_id']) ? intval($_GET['case_id']) : 0;
 
 if($case_id) {
-    $query = "SELECT 
+    $query = "
+    SELECT 
         COUNT(*) as total,
         SUM(CASE WHEN status IN ('interested', 'high_interest') THEN 1 ELSE 0 END) as interested,
         SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
         SUM(CASE WHEN status IN ('cancelled', 'not_interested', 'not_qualified') THEN 1 ELSE 0 END) as rejected
-        FROM follow_logs WHERE case_id = :case_id";
+    FROM follow_logs 
+    WHERE case_id = :case_id";
     
     $stmt = $db->prepare($query);
     $stmt->bindParam(':case_id', $case_id, PDO::PARAM_INT);

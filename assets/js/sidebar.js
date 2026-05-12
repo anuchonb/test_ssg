@@ -1,5 +1,3 @@
-// ============ SIDEBAR TOGGLE ============
-
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.querySelector('.main-content');
@@ -184,7 +182,6 @@ function showHelp() {
   });
 }
 
-// ✅ ประกาศ logout ใน global scope
 function logout() {
   if (confirm("ยืนยันการออกจากระบบ?")) {
     window.location.href = "../index.php?logout=1";
@@ -198,22 +195,13 @@ $(document).ready(function () {
   if (isCollapsed) {
     $("#sidebar").addClass("collapsed");
   }
-
-  // Update toggle button
   updateToggleButton();
-
-  // Load stats
   loadSidebarStats();
   setInterval(loadSidebarStats, 30000);
-
-  // Highlight active menu
   highlightActiveMenu();
-
-  // Handle responsive
   handleResponsive();
 });
 
-// Highlight active menu
 function highlightActiveMenu() {
   const currentPage = window.location.pathname.split("/").pop();
   $(".sidebar-nav .nav-link").each(function () {
@@ -227,7 +215,6 @@ function highlightActiveMenu() {
   }
 }
 
-// Handle responsive
 function handleResponsive() {
   if (window.innerWidth <= 768) {
     $("#sidebar").addClass("collapsed");
@@ -235,7 +222,6 @@ function handleResponsive() {
   }
 }
 
-// ✅ ฟังก์ชั่นนี้ต้องมีใน sidebar.php
 function loadSidebarStats() {
     $.ajax({
         url: '../api/dashboard/sidebar_stats.php',
@@ -263,11 +249,7 @@ function loadSidebarStats() {
     });
 }
 
-// ============ ⌨️ KEYBOARD SHORTCUTS ============
-
-// ✅ รอให้ DOM โหลดเสร็จก่อน
 $(document).ready(function () {
-  // ✅ ใช้ keydown event
   $(document).on("keydown", function (e) {
     // Ctrl + B = Toggle Sidebar
     if (e.ctrlKey && e.key === "b") {
@@ -345,7 +327,6 @@ function logout() {
   });
 }
 
-// Prevent sidebar from closing on large screens
 $(document).on("click", ".sidebar-nav .nav-link", function (e) {
   if (window.innerWidth <= 768) {
     // On mobile, collapse sidebar after clicking

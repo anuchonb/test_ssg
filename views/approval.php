@@ -379,11 +379,9 @@ function formatThaiDate(d) {
     } catch(e) { return d; }
 }
 </script>
-
 <?php
-if($case_id) {
-    $_SESSION['last_case_id'] = $case_id;
-}
+    if($case_id) {
+        $_SESSION['last_case_id'] = $case_id;
+    }
 ?>
-
 <?php include_once '../includes/footer.php'; ?>

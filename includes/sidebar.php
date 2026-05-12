@@ -11,30 +11,21 @@ $user_role = isset($_SESSION['user_role']) ? $_SESSION['user_role'] : '';
 $user_name = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : '';
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
 
-// ✅ ดึง case_id จาก URL หลายรูปแบบ
 $current_case_id = '';
 
-// จาก case_detail.php?id=X
 if ($current_page == 'case_detail.php' && isset($_GET['id'])) {
     $current_case_id = intval($_GET['id']);
-}
-// จากหน้าใดๆ ที่มี case_id=X
-elseif (isset($_GET['case_id'])) {
+} elseif (isset($_GET['case_id'])) {
     $current_case_id = intval($_GET['case_id']);
-}
-// จาก Session (ถ้าเคยเปิด case_detail ไว้)
-elseif (isset($_SESSION['last_case_id'])) {
+} elseif (isset($_SESSION['last_case_id'])) {
     $current_case_id = intval($_SESSION['last_case_id']);
 }
 
-// ✅ เก็บ case_id ใน session (เพื่อใช้งานข้ามหน้า)
 if ($current_case_id) {
     $_SESSION['last_case_id'] = $current_case_id;
 }
 
-/**
- * สร้าง URL พร้อม case_id
- */
+
 function url($page, $case_id = null)
 {
     global $current_case_id;
@@ -51,7 +42,6 @@ function url($page, $case_id = null)
 }
 
 
-// ✅ ฟังก์ชั่นสร้าง alert เมื่อไม่มี case_id (SweetAlert2)
 function noCaseAlert() {
     global $current_case_id;
     if (!$current_case_id) {
@@ -73,7 +63,6 @@ function isActiveGroup($pages)
 }
 ?>
 
-<!-- ==================== SIDEBAR HTML ==================== -->
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <img src="../assets/img/logo.png" width="100" alt="Logo" class="img-fluid sidebar-logo">
@@ -128,9 +117,6 @@ function isActiveGroup($pages)
             </li>
         <div class="sidebar-divider"></div>
         <?php endif; ?>
-
-
-        <!-- ==================== เมนูที่มี case_id ==================== -->
 
         <!-- Case Detail -->
         <?php if (in_array($_SESSION['user_role'], ['admin_page', 'admin', 'support'])): ?>
@@ -245,7 +231,6 @@ function isActiveGroup($pages)
         <?php endif; ?>
         <?php endif; ?>
 
-        <!-- ==================== ADMIN MODULES ==================== -->
         <?php if ($_SESSION['user_role'] == 'admin'): ?>
             <li class="sidebar-heading"><span>⚙️ ผู้ดูแลระบบ</span></li>
 
@@ -288,7 +273,6 @@ function isActiveGroup($pages)
 
         <?php endif; ?>
 
-        <!-- ==================== USER MENU ==================== -->
         <li class="sidebar-heading"><span>👤 ผู้ใช้งาน</span></li>
 
         <li class="nav-item">
