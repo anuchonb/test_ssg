@@ -393,7 +393,7 @@ function resetLogoutTimer() {
 
 $(document).ready(function() {
     resetLogoutTimer();
-     initFlatpickr();
+    initFlatpickr();
     ['click', 'keypress', 'scroll', 'mousemove'].forEach(event => {
         document.addEventListener(event, () => {
             resetLogoutTimer();
