@@ -571,17 +571,6 @@ function loadPasswordInfo() {
     // This would typically come from an API
     // For now, show current time as placeholder
     $('#lastPasswordChange').text('ยังไม่มีข้อมูล');
-    
-    // You can add API call here:
-    // $.ajax({
-    //     url: '../api/users/password_info.php',
-    //     type: 'GET',
-    //     success: function(response) {
-    //         if(response.success) {
-    //             $('#lastPasswordChange').text(response.last_change || 'ยังไม่มีข้อมูล');
-    //         }
-    //     }
-    // });
 }
 
 // ============ KEYBOARD SHORTCUTS ============

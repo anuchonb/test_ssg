@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 include_once '../../config/database.php';
+include_once '../../includes/line_notify.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -36,6 +37,7 @@ try {
 
     // ตรวจสอบสถานะที่อนุญาต
     $allowed_status = ['processing', 'approved', 'rejected'];
+
     if (!in_array($status, $allowed_status)) {
         $status = 'processing';
     }
@@ -66,6 +68,11 @@ try {
         $stmt->execute([$case_id, $status, $approved_amount, $note]);
         
         $message = "บันทึก Pre-Approve สำเร็จ!";
+    }
+
+    if ($status === 'approved') {
+        sendLineToCaseOwner($db, $case_id, "✅ Pre-Approve อนุมัติ!\nCase #{$case_id}\nวงเงิน: " . number_format($approved_amount) . " บาท");
+        sendLineToAllAdmins($db, "✅ Pre-Approve อนุมัติ #{$case_id}\nวงเงิน: " . number_format($approved_amount) . " บาท");
     }
 
     // Log activity

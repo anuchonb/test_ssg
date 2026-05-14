@@ -57,7 +57,7 @@ try {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $profile_response = curl_exec($ch);
     curl_close($ch);
-    
+
     $profile = json_decode($profile_response, true);
 
     if (isset($profile['userId']) && isset($_SESSION['user_id'])) {

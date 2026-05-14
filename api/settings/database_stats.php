@@ -16,10 +16,10 @@ $db = $database->getConnection();
 
 try {
     $dbname = 'test_ssg_db';
-    $query = "SELECT 
-        TABLE_NAME as name,
-        COALESCE(TABLE_ROWS, 0) as `rows`,
-        ROUND((DATA_LENGTH + INDEX_LENGTH) / 1024, 2) as size_kb
+    $query = "
+        SELECT TABLE_NAME as name,
+                COALESCE(TABLE_ROWS, 0) as `rows`,
+                ROUND((DATA_LENGTH + INDEX_LENGTH) / 1024, 2) as size_kb
         FROM information_schema.TABLES 
         WHERE TABLE_SCHEMA = :dbname
         ORDER BY TABLE_NAME";

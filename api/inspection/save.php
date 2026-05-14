@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 include_once '../../config/database.php';
+include_once '../../includes/line_notify.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -40,6 +41,7 @@ try {
     $uploaded_photos = [];
     
     if (isset($_FILES['photos']) && is_array($_FILES['photos']['name'])) {
+
         $upload_dir = "../../uploads/inspections/{$case_id}/";
         if (!file_exists($upload_dir)) {
             mkdir($upload_dir, 0777, true);
@@ -83,6 +85,11 @@ try {
             }
         }
     }
+
+    $statusText = $status === 'pass' ? '✅ ผ่าน' : '❌ ไม่ผ่าน';
+    $message = "🔍 ตรวจห้อง #{$case_id}\n━━━━━━━━━━━━━\nครั้งที่: {$round}\nผล: {$statusText}";
+    if (!empty($note)) $message .= "\n📝 {$note}";
+    sendLineToAllAdmins($db, $message);
 
     // Log activity
     if (isset($_SESSION['user_id'])) {

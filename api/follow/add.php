@@ -11,13 +11,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 include_once '../../config/database.php';
+include_once '../../includes/line_notify.php';
 
 $database = new Database();
 $db = $database->getConnection();
 
 // ✅ Debug: log ข้อมูลที่ได้รับ
 $raw = file_get_contents("php://input");
-error_log("Follow Add Raw Input: " . $raw);
+// error_log("Follow Add Raw Input: " . $raw);
 
 // ✅ ลอง decode JSON
 $data = json_decode($raw);
@@ -71,6 +72,8 @@ try {
         WHERE id = ?";
     $updateStmt = $db->prepare($updateQuery);
     $updateStmt->execute([$case_id, $status, $case_id]);
+
+    sendLineToAllAdmins($db, "📞 ติดตามเคส #{$case_id}\n━━━━━━━━━━━━━\nครั้งที่: {$step}\nสถานะ: {$status}\n" . ($note ? "📝 {$note}" : ""));
 
     // ✅ Log activity
     if (isset($_SESSION['user_id'])) {

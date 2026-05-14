@@ -280,7 +280,7 @@ function saveBank() {
 
 // ✅ โหลดประวัติการส่งธนาคาร
 function loadBankHistory() {
-    console.log('Loading bank history for case:', CASE_ID);
+    // console.log('Loading bank history for case:', CASE_ID);
     
     $.ajax({
         url: '../api/bank/list.php',

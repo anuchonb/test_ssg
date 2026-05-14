@@ -222,6 +222,19 @@ if (!checkRole('admin')) {
                             <div class="card-header"><h5>📱 ตั้งค่า LINE Login</h5></div>
                             <div class="card-body">
                                 <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i> 
+                                    ได้ Channel Access Token จาก 
+                                    <a href="https://developers.line.biz/console/" target="_blank">LINE Developers Console</a>
+                                    → Messaging API → Channel Access Token
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Channel Access Token</label>
+                                    <input type="text" class="form-control" id="line_channel_token" 
+                                        placeholder="eyJhbGciOiJIUzI1NiJ9...">
+                                    <small class="text-muted">ใช้สำหรับส่ง Push Message หา User</small>
+                                </div>
+                                <div class="alert alert-info">
                                     <strong>🔗 การตั้งค่า Callback URL:</strong><br>
                                     ใช้ URL: <code><?php echo $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']) . '/api/line/callback.php'; ?></code>
                                 </div>
@@ -489,7 +502,7 @@ if (!checkRole('admin')) {
                 $('#line_login_enabled').prop('checked', s.line_login_enabled == '1');
 
                 // Tab LINE
-                $('#line_token').val(s.line_token || '');
+                $('#line_channel_token').val(s.line_channel_token || '');
                 $('#line_new_case').prop('checked', s.line_new_case == '1');
                 $('#line_approval').prop('checked', s.line_approval == '1');
                 $('#line_transfer').prop('checked', s.line_transfer == '1');
@@ -516,6 +529,7 @@ if (!checkRole('admin')) {
             enable_maintenance: $('#enable_maintenance').is(':checked') ? '1' : '0',
 
             // ✅ LINE Login (เพิ่มใหม่)
+            line_channel_token: $('#line_channel_token').val(),
             line_channel_id: $('#line_channel_id').val(),
             line_channel_secret: $('#line_channel_secret').val(),
             line_callback_url: $('#line_callback_url').val(),

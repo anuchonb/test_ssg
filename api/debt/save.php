@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 include_once '../../config/database.php';
+include_once '../../includes/line_notify.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -60,6 +61,10 @@ try {
             }
         }
     }
+
+    $total = 0;
+    foreach ($data->items as $item) $total += floatval($item->amount);
+    sendLineToAllAdmins($db, "💳 ปิดหนี้แล้ว!\n━━━━━━━━━━━━━\nCase #{$case_id}\nจำนวน: " . count($data->items) . " รายการ\nรวม: " . number_format($total, 2) . " บาท");
 
     // Update document_steps debt_close_status
     $updateDoc = $db->prepare("UPDATE document_steps SET debt_close_status = 'done' WHERE case_id = ?");

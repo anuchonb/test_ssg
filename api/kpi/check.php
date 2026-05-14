@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 include_once '../../config/database.php';
+include_once '../../includes/line_notify.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -60,6 +61,12 @@ try {
         $stmt = $db->prepare($query);
         $stmt->execute([$case_id, $checker_id, $result, $reason]);
         $message = "บันทึกผล KPI สำเร็จ!";
+    }
+
+    if ($result === 'fail') {
+        $reasonText = $reason ? "เหตุผล: {$reason}" : "";
+        sendLineToCaseOwner($db, $case_id, "❌ KPI ไม่ผ่าน!\n━━━━━━━━━━━━━\nCase #{$case_id}\n{$reasonText}");
+        sendLineToAllAdmins($db, "❌ KPI ไม่ผ่าน #{$case_id}\n{$reasonText}");
     }
 
     // ✅ บันทึก Activity Log

@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 include_once '../../config/database.php';
+include_once '../../includes/line_notify.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -56,6 +57,12 @@ try {
         $stmt = $db->prepare($query);
         $stmt->execute([$case_id, $total_amount, $room_amount, $insurance_amount, $furniture_amount, 
                         $contract_date, $transfer_date, $note]);
+
+        $message = "💰 อนุมัติแล้ว! Case #{$case_id}\n━━━━━━━━━━━━━\nวงเงิน: " . number_format($total_amount) . " บาท";
+        if ($transfer_date) $message .= "\n📅 วันโอน: {$transfer_date}";
+
+        sendLineToCaseOwner($db, $case_id, $message);
+        sendLineToAllAdmins($db, $message);
     }
 
     echo json_encode([

@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 include_once '../../config/database.php';
+include_once '../../includes/line_notify.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -36,6 +37,10 @@ try {
     $query = "INSERT INTO bank_submissions (case_id, bank_name, submit_date, note) VALUES (?, ?, ?, ?)";
     $stmt = $db->prepare($query);
     $stmt->execute([$case_id, $bank_name, $submit_date, $note]);
+
+    $message = "🏦 ส่งธนาคารแล้ว!\n━━━━━━━━━━━━━\nCase #{$case_id}\nธนาคาร: {$bank_name}\nวันที่: {$submit_date}";
+    if (!empty($note)) $message .= "\n📝 {$note}";
+    sendLineToAllAdmins($db, $message);
 
     // Log activity
     if (isset($_SESSION['user_id'])) {

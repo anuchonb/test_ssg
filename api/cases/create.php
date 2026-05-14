@@ -12,6 +12,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
 
 include_once '../../config/database.php';
+include_once '../../includes/line_notify.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -48,6 +49,12 @@ if(!empty($data->customer_id)) {
         $activity_stmt->bindParam(":case_id", $case_id);
         $activity_stmt->bindParam(":user_id", $data->owner_id);
         $activity_stmt->execute();
+
+        // ส่งหาเจ้าของเคส
+        sendLineToCaseOwner($db, $case_id, "📋 มีเคสใหม่!\n━━━━━━━━━━━━━\nลูกค้า: {$customer_name}\nCase #{$case_id}");
+
+        // ส่งหา Admin ทั้งหมด
+        sendLineToAllAdmins($db, "📋 เคสใหม่ #{$case_id}\nลูกค้า: {$customer_name}");
         
         $db->commit();
         
